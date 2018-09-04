@@ -1,0 +1,8 @@
+name: "Kam"
+output_dir: "."
+navbar:
+  title: "Kam"
+  left:
+  - text: "Writing"
+    href: rmd2.html
+output: html_document
