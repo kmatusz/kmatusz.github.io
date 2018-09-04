@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+
+<title></title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Kam</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="rmd2.html">Writing</a>
+</li>
+<li>
+  <a href="cifar-analysis.html">Writing</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+
+</div>
+
+
+<div id="cifar-10-images-classification-challenge" class="section level1">
+<h1>CIFAR-10 images classification challenge</h1>
+<div id="loading-data-and-checking-structure" class="section level2">
+<h2>Loading data and checking structure</h2>
+<p>Let’s do some exploratory data analysis. First we’ll load the data from the files downloaded from CIFAR website.</p>
+<pre class="python"><code>#importing libraries
+
+#general libraries
+import pickle
+import collections
+import time
+from PIL import Image
+from mpl_toolkits.axes_grid1 import ImageGrid
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+#keras library
+from keras.preprocessing import image
+from keras.models import Sequential
+from keras.layers import Dense, Dropout
+from keras.applications.inception_v3 import InceptionV3
+from keras.utils import np_utils
+
+#skimage library
+from skimage.transform import resize
+from skimage.feature import hog
+
+#sklearn library
+from sklearn.manifold import TSNE
+from sklearn.decomposition import PCA
+from sklearn.svm import LinearSVC
+from sklearn.metrics import accuracy_score, confusion_matrix
+from sklearn.model_selection import GridSearchCV, RandomizedSearchCV, train_test_split
+from sklearn.ensemble import RandomForestClassifier
+
+#ipython magics
+%config IPCompleter.greedy=True</code></pre>
+<pre class="python"><code>
+def preprocess_inception (df, only_reshape=False): 
+    #the function first reshapes the input data to proper image format. Later it resizes the imagest to fit InceptionV3 net.
+    #The last layer is removed from the net and features are extracted.
+    
+    df_small_reshaped=[]
+    time_start=time.time() #timer
+    #for i in range(len(df)): 
+    #    df_small_reshaped.append(df[i].reshape(3,1024).T.reshape(32,32,3))
+    #df= np.asarray(df_small_reshaped)
+    print(&quot;Image data reshaped&quot;)
+    if only_reshape:
+        print(&quot;selected only reshaping mode&quot;)
+        return df
+    
+    #removing top layer, input shape set to default for inception model
+    model = InceptionV3(weights=&#39;imagenet&#39;, include_top=False, input_shape=(139, 139, 3)) 
+    print(&quot;Model created&quot;)
+    
+    df_train_resized = np.array([resize(df[i], (139, 139, 3)) 
+                        for i in range(0, len(df))]).astype(&#39;float32&#39;)
+    print(&quot;image resized to suit inception model&quot;)
+    features_inception = model.predict(df_train_resized, verbose=1)
+    print(&quot;features predicted&quot;)
+    features_inception = np.squeeze(features_inception)
+    features_inception = features_inception.reshape((len(df), 3*3*2048))
+    print(&quot;features reshaped to suit sklearn models&quot;)
+    print(&quot;total time:  &quot;, time.time()-time_start, &quot; s&quot;)
+    return features_inception
+    </code></pre>
+<pre class="python"><code>#Snippet taken from cifar-10 website unpacking the data
+def unpickle(file):
+    import pickle
+    with open(file, &#39;rb&#39;) as fo:
+        dict = pickle.load(fo, encoding=&#39;bytes&#39;)
+    return dict</code></pre>
+<p>Checking labels of the images:</p>
+<pre class="python"><code>unpickle(&#39;data\\batches.meta&#39;)</code></pre>
+<pre><code>{b&#39;num_cases_per_batch&#39;: 10000,
+ b&#39;label_names&#39;: [b&#39;airplane&#39;,
+  b&#39;automobile&#39;,
+  b&#39;bird&#39;,
+  b&#39;cat&#39;,
+  b&#39;deer&#39;,
+  b&#39;dog&#39;,
+  b&#39;frog&#39;,
+  b&#39;horse&#39;,
+  b&#39;ship&#39;,
+  b&#39;truck&#39;],
+ b&#39;num_vis&#39;: 3072}</code></pre>
+<p>Checking structure of one training batch:</p>
+<pre class="python"><code>batch1 = unpickle(&#39;data\data_batch_1&#39;)
+print(&quot;Keys of one batch dictionary are: &quot;, list(batch1.keys()))
+print(&quot;Shape of dataset is &quot;, batch1[b&#39;data&#39;].shape)
+
+print(&quot;Checking the distribution of labels: &quot;, dict(collections.Counter(batch1[b&#39;labels&#39;])))</code></pre>
+<pre><code>Keys of one batch dictionary are:  [b&#39;batch_label&#39;, b&#39;labels&#39;, b&#39;data&#39;, b&#39;filenames&#39;]
+Shape of dataset is  (10000, 3072)
+Checking the distribution of labels:  {6: 1030, 9: 981, 4: 999, 1: 974, 2: 1032, 7: 1001, 8: 1025, 3: 1016, 5: 937, 0: 1005}</code></pre>
+<p>Everything is loaded properly. Let’s now load the full training dataset:</p>
+<pre class="python"><code>x=batch1[b&#39;data&#39;]
+y=batch1[b&#39;labels&#39;]
+
+for i in range(2,6):
+    temp_dict= unpickle(&#39;data\data_batch_&#39;+str(i) )
+    x=np.append(x, temp_dict[b&#39;data&#39;], axis=0)
+    y=y+temp_dict[b&#39;labels&#39;]</code></pre>
+<div id="randomly-selecting-images-to-modelling" class="section level4">
+<h4>Randomly selecting images to modelling</h4>
+<p>Because I didn’t have access to proper GPU, I used 1/10 of the dataset for training and 1/20 for validation.</p>
+<pre class="python"><code>#train and test sets
+x_left, x_train, y_left, y_train = train_test_split(
+    x, y, test_size=0.1, random_state=42)
+x_left, x_test, y_left, y_test = train_test_split(
+    x_left, y_left, test_size=0.05, random_state=42)
+
+#remove auxiliary data
+del x_left
+del y_left
+del x
+del y
+x_train.shape</code></pre>
+<pre><code>(5000, 3072)</code></pre>
+</div>
+<div id="wisualising-the-images" class="section level4">
+<h4>Wisualising the images</h4>
+<pre class="python"><code>a = Image.open(&quot;a.jpg&quot;)
+a.load()
+a=np.asarray(a, dtype= &quot;int32&quot;)
+a=[a]
+a</code></pre>
+<pre class="python"><code>prep_kot = preprocess_inception(a)</code></pre>
+<pre><code>Image data reshaped
+Model created
+image resized to suit inception model
+
+
+C:\ProgramData\Anaconda3\lib\site-packages\skimage\transform\_warps.py:84: UserWarning: The default mode, &#39;constant&#39;, will be changed to &#39;reflect&#39; in skimage 0.15.
+  warn(&quot;The default mode, &#39;constant&#39;, will be changed to &#39;reflect&#39; in &quot;
+
+
+1/1 [==============================] - 2s 2s/step
+features predicted
+features reshaped to suit sklearn models
+total time:   34.12488412857056  s</code></pre>
+<pre class="python"><code></code></pre>
+<pre><code>(1, 18432)</code></pre>
+<pre class="python"><code>a = resize(a, (139, 139, 3))</code></pre>
+<pre><code>C:\ProgramData\Anaconda3\lib\site-packages\skimage\transform\_warps.py:84: UserWarning: The default mode, &#39;constant&#39;, will be changed to &#39;reflect&#39; in skimage 0.15.
+  warn(&quot;The default mode, &#39;constant&#39;, will be changed to &#39;reflect&#39; in &quot;</code></pre>
+<pre class="python"><code>%matplotlib inline
+examples_indexes=[]
+for number in range(0,11):
+    examples_indexes.append( [i for i, n in enumerate(y_train) if n==number][0:10])
+
+examples_images=[]
+for i in examples_indexes:
+    examples_images=examples_images+i
+    
+    
+for i in range(len(examples_images)):
+    
+    examples_images[i]= Image.fromarray((x_train[examples_images[i]].reshape(3,1024).T.reshape(32,32,3)*255).astype(&#39;uint8&#39;), &#39;RGB&#39;)
+    
+
+
+for i in range(1,101):
+    plt.subplot(10,10,i)
+    plt.imshow(examples_images[i-1])
+    plt.axis(&quot;off&quot;)</code></pre>
+<div class="figure">
+<img src="cifar-analysis_files/cifar-analysis_20_0.png" alt="png" />
+<p class="caption">png</p>
+</div>
+</div>
+</div>
+<div id="training-a-shallow-classifier" class="section level2">
+<h2>Training a shallow classifier</h2>
+<p>To serve as a benchmark for next tests, I’m using HOG technique to extract features from the images and then I’m training SVM classifier on top of it.</p>
+<pre class="python"><code>#preprocessing image dataset to greyscale
+features_hog_train= preprocess_inception(x_train, only_reshape=True)
+features_hog_test= preprocess_inception(x_test, only_reshape=True)
+features_hog_train=np.squeeze((0.21 * features_hog_train[:,:,:,:1]) + (0.72 * features_hog_train[:,:,:,1:2]) + (0.07 * features_hog_train[:,:,:,-1:]))
+features_hog_test=np.squeeze((0.21 * features_hog_test[:,:,:,:1]) + (0.72 * features_hog_test[:,:,:,1:2]) + (0.07 * features_hog_test[:,:,:,-1:]))</code></pre>
+<pre><code>Image data reshaped
+selected only reshaping mode
+Image data reshaped
+selected only reshaping mode</code></pre>
+<pre class="python"><code>def compute_hog(data):
+    hog_features=[]
+    for image in data:
+        hog_features.append( hog(image, orientations=8))
+
+    hog_features=np.asarray(hog_features)
+    return hog_features</code></pre>
+<pre class="python"><code>features_hog_train=compute_hog(features_hog_train)
+features_hog_test=compute_hog(features_hog_test)</code></pre>
+<pre><code>C:\ProgramData\Anaconda3\lib\site-packages\skimage\feature\_hog.py:119: skimage_deprecation: Default value of `block_norm`==`L1` is deprecated and will be changed to `L2-Hys` in v0.15
+  &#39;be changed to `L2-Hys` in v0.15&#39;, skimage_deprecation)</code></pre>
+<pre class="python"><code>#creating shallow classifier using hog features
+hog_clf = LinearSVC(C=2)
+hog_fitted = hog_clf.fit(features_hog_train, np.asarray(y_train))  
+</code></pre>
+<pre class="python"><code>hog_predicted = hog_fitted.predict(features_hog_test)</code></pre>
+<pre class="python"><code>print(&quot;Accuracy using this technique is &quot;, round(accuracy_score(hog_predicted, y_test),4))</code></pre>
+<pre><code>Accuracy using this technique is  0.4382</code></pre>
+<p>As we can see, accuracy using shallow classifier isn’t very promising. Next step is to use state-of-the-art InceptionV3 model to obtain features.</p>
+</div>
+<div id="classification-task-using-transfer-learning" class="section level2">
+<h2>Classification task using transfer learning</h2>
+<p>As the shallow classifier didn’t perform well, I’m going to try transfer learning approach. First step is to extract features using InceptionV3 model, but with removed last layer. Next I visualize obtained features. Then I check some out-of-the box SVM classifier and see how it performs. Lastly I use GridSeach cross validation to select best penalty for the model (C parameter).</p>
+<div id="preprocessing-dataset-and-extracting-features" class="section level4">
+<h4>Preprocessing dataset and extracting features</h4>
+<pre class="python"><code>#creating training and test sets using features extraction
+#features_inception_train = np.load(&quot;backups/features_inception_train.npy&quot;)
+#features_inception_test = np.load(&quot;backups/features_inception_test.npy&quot;)
+features_inception_test = preprocess_inception(x_test)
+features_inception_train = preprocess_inception(x_train)
+#np.save(&quot;backups/features_inception_train.npy&quot;, features_inception_train)
+#np.save(&quot;backups/features_inception_test.npy&quot;, features_inception_test)</code></pre>
+<pre><code>---------------------------------------------------------------------------
+
+NameError                                 Traceback (most recent call last)
+
+&lt;ipython-input-20-733c01e470f1&gt; in &lt;module&gt;()
+      2 #features_inception_train = np.load(&quot;backups/features_inception_train.npy&quot;)
+      3 #features_inception_test = np.load(&quot;backups/features_inception_test.npy&quot;)
+----&gt; 4 features_inception_test = preprocess_inception(x_test)
+      5 features_inception_train = preprocess_inception(x_train)
+      6 #np.save(&quot;backups/features_inception_train.npy&quot;, features_inception_train)
+
+
+NameError: name &#39;x_test&#39; is not defined</code></pre>
+</div>
+<div id="using-t-sne-technique-to-visualise-cnn-codes" class="section level4">
+<h4>Using t-sne technique to visualise CNN codes</h4>
+<p>T-sne technique is suitable for high-dimensional, non-linear data. In previous tests I also used PCA technique, but the results were less promising.</p>
+<pre class="python"><code>time_start = time.time()
+tsne = TSNE(n_components=2, perplexity=40, n_iter=300)
+tsne_results = tsne.fit_transform(features_inception_train)
+
+print (&#39;T-sne done. Total time: &#39;, time.time()-time_start, &quot; s&quot;)</code></pre>
+<pre><code>T-sne done. Total time:  1704.6055014133453  s</code></pre>
+<pre class="python"><code>#np.save(&quot;backups/t-sne-1.npy&quot;, tsne_results)
+tsne_results = np.load(&quot;backups/t-sne-1.npy&quot;)</code></pre>
+<pre class="python"><code>import seaborn as sns
+import pandas as pd
+tsne_df = pd.DataFrame({&#39;x1&#39;:tsne_results[:,0], &#39;x2&#39;:tsne_results[:,1], &#39;label&#39;:y_train})
+sns.set(rc={&#39;figure.dpi&#39;:100})
+sns.lmplot(x=&#39;x1&#39;, y=&#39;x2&#39;,
+                hue=&#39;label&#39;,
+                data=tsne_df,
+           fit_reg=False,
+           scatter_kws={&quot;s&quot;: 5}
+                )
+plt.title(&quot;Features projection using t-SNE technique&quot;)</code></pre>
+<pre><code>Text(0.5,1,&#39;Features projection using t-SNE technique&#39;)</code></pre>
+<div class="figure">
+<img src="cifar-analysis_files/cifar-analysis_38_1.png" alt="png" />
+<p class="caption">png</p>
+</div>
+</div>
+<div id="creating-out-of-the-box-svm-classifier" class="section level4">
+<h4>Creating out-of the-box svm classifier</h4>
+<p>As the first try I’m using svm classifier with default parameters.</p>
+<pre class="python"><code>to_norm = features_inception_train.max() #checking max value for normalisation before passing data to the model</code></pre>
+<pre class="python"><code>time_start = time.time()
+
+clf_linear = LinearSVC() #by default C=1
+fitted_inception = clf_linear.fit(features_inception_train/to_norm, np.asarray(y_train))  
+print()
+print(&quot;Model fitted. Total fitting time: &quot;, time.time()-time_start, &quot;s&quot;)</code></pre>
+<pre><code>Model fitted. Total fitting time:  77.79637598991394 s</code></pre>
+<p>Checking basic stats regarding the model:</p>
+<pre class="python"><code>inception_predicted_train = fitted_inception.predict(features_inception_train)
+inception_predicted_test = fitted_inception.predict(features_inception_test)
+print(&#39;Accuracy on the training set:&#39;, round(accuracy_score(inception_predicted_train, np.asarray(y_train)),4))
+print(&#39;Accuracy on the test set:&#39;, round(accuracy_score(inception_predicted_test, np.asarray(y_test)),4))
+#print(confusion_matrix(inception_predicted_train, np.asarray(y_train)))</code></pre>
+<pre><code>Accuracy on the training set: 0.9998
+Accuracy on the test set: 0.7271</code></pre>
+<p>Such high accuracy on the training set and relatively low on the test set indicate the overfitting problem. In this case the best solution would be to gather more data. As it’s not feasible in this case (due to high memory usage), changing hyperparameter C would be the best idea. The intuition says that lowering it would help so I’m going to use cross validation to select the best value.</p>
+</div>
+<div id="using-random-cv-to-select-best-parameters" class="section level4">
+<h4>Using random CV to select best parameters</h4>
+<pre class="python"><code>hyperparameters={&#39;C&#39;:[0.001, 0.01, 0.1, 1]}
+clf_cv = GridSearchCV(LinearSVC(verbose=1, random_state=1), hyperparameters, cv=2, verbose=1, n_jobs=-1,return_train_score=True)
+
+model_gridCV = clf_cv.fit(features_inception_train/to_norm, np.asarray(y_train))
+model_gridCV.cv_results_</code></pre>
+<pre><code>Fitting 2 folds for each of 4 candidates, totalling 8 fits
+
+
+[Parallel(n_jobs=-1)]: Done   8 out of   8 | elapsed:  3.4min finished
+
+
+[LibLinear]
+
+
+
+
+{&#39;mean_fit_time&#39;: array([47.59077573, 62.03595328, 73.71247494, 59.59823513]),
+ &#39;std_fit_time&#39;: array([0.34438848, 2.89337826, 0.9039439 , 9.53200889]),
+ &#39;mean_score_time&#39;: array([14.4882642 , 10.15205801,  2.02868736,  0.97538197]),
+ &#39;std_score_time&#39;: array([7.57190883, 2.43240178, 0.20472682, 0.35054028]),
+ &#39;param_C&#39;: masked_array(data=[0.001, 0.01, 0.1, 1],
+              mask=[False, False, False, False],
+        fill_value=&#39;?&#39;,
+             dtype=object),
+ &#39;params&#39;: [{&#39;C&#39;: 0.001}, {&#39;C&#39;: 0.01}, {&#39;C&#39;: 0.1}, {&#39;C&#39;: 1}],
+ &#39;split0_test_score&#39;: array([0.64522573, 0.69676388, 0.72273272, 0.70914902]),
+ &#39;split1_test_score&#39;: array([0.66359632, 0.71565879, 0.73648378, 0.71285543]),
+ &#39;mean_test_score&#39;: array([0.6544, 0.7062, 0.7296, 0.711 ]),
+ &#39;std_test_score&#39;: array([0.00918529, 0.00944745, 0.00687552, 0.0018532 ]),
+ &#39;rank_test_score&#39;: array([4, 3, 1, 2]),
+ &#39;split0_train_score&#39;: array([0.71846215, 0.86663997, 0.98438126, 1.        ]),
+ &#39;split1_train_score&#39;: array([0.71634039, 0.86136636, 0.98282062, 1.        ]),
+ &#39;mean_train_score&#39;: array([0.71740127, 0.86400316, 0.98360094, 1.        ]),
+ &#39;std_train_score&#39;: array([0.00106088, 0.0026368 , 0.00078032, 0.        ])}</code></pre>
+<p>The best C value from the selected ones is 0.1. To further improve the accuracy we could search hyperparameter space just around this value. But still, the accuracy obtained isn’t satisfactiory. As I’m still tackling the overfitting problem, I’m gonna use PCA to project data into lower dimensions and check if it gets me somewhere.</p>
+</div>
+<div id="using-pca-to-prevent-overfitting" class="section level4">
+<h4>Using PCA to prevent overfitting</h4>
+<p>To check the optimal cut-off point I’m gonna plot no. of features vs. the variance explained</p>
+<pre class="python"><code>pca = PCA().fit(features_inception_train/to_norm)
+plt.plot(np.cumsum(pca.explained_variance_ratio_))
+plt.xlabel(&#39;Number of components&#39;)
+plt.ylabel(&#39;Cumulative explained variance&#39;)
+</code></pre>
+<pre><code>Text(0,0.5,&#39;Cumulative explained variance&#39;)</code></pre>
+<div class="figure">
+<img src="cifar-analysis_files/cifar-analysis_51_1.png" alt="png" />
+<p class="caption">png</p>
+</div>
+<p>I will be using enough components to capture roughly 0.9 of variance.</p>
+<pre class="python"><code>pca_reduced= PCA(n_components= 2000,svd_solver=&#39;randomized&#39;, random_state=1).fit(features_inception_train/to_norm)
+pca_reduced_train= pca_reduced.transform(features_inception_train/to_norm)
+pca_reduced_test= pca_reduced.transform(features_inception_test/to_norm)</code></pre>
+<p>For readability the cross validation procedure isn’t included in this notebook, but best value obtained for C was again 0.1.</p>
+<pre class="python"><code>to_norm_pca = pca_reduced_train.max()</code></pre>
+<pre class="python"><code>#using svm to classify test data
+clf_pca = LinearSVC(verbose=1, C=0.1)
+print(&quot;model created&quot;)
+fitted_inception_pca = clf_pca.fit(pca_reduced_train/to_norm_pca, np.asarray(y_train))  
+
+predicted_svm_pca = fitted_inception_pca.predict(pca_reduced_test/to_norm_pca)</code></pre>
+<pre><code>model created
+[LibLinear]</code></pre>
+<pre class="python"><code>print(&quot;Accuracy: &quot;,round(accuracy_score(predicted_svm_pca, y_test),4))
+#accuracy is lower than using data without pca transformation</code></pre>
+<pre><code>Accuracy:  0.7271</code></pre>
+<p>Using PCA didn’t show much improvement. Last attempt in my analysis to improve accuracy is to use neural net trained on top of Inception model and see how well it performs.</p>
+</div>
+</div>
+<div id="creating-classifier-neural-net-on-top-of-inception-architecture" class="section level2">
+<h2>Creating classifier neural net on top of inception architecture</h2>
+<p>Now I’m going to try using some basic neural net to classify the images. I’m using features precomputed by the Inception model.</p>
+<pre class="python"><code>
+
+# one-hot encode the labels
+y_train_onehot = np_utils.to_categorical(y_train, 10)
+y_test_onehot = np_utils.to_categorical(y_test, 10)</code></pre>
+<pre class="python"><code>
+#creating some basic model
+model_custom= Sequential()
+model_custom.add(Dense(units=400, input_dim=18432, activation=&#39;relu&#39;))
+model_custom.add(Dropout(0.5))
+model_custom.add(Dense(units=10, activation=&#39;softmax&#39;))
+
+model_custom.compile(loss=&#39;categorical_crossentropy&#39;,
+              optimizer=&#39;sgd&#39;,
+              metrics=[&#39;accuracy&#39;])</code></pre>
+<pre class="python"><code>model_custom.fit(features_inception_train, y_train_onehot, epochs=25, batch_size=50, verbose=2, validation_split=0.2)</code></pre>
+<pre><code>Train on 4000 samples, validate on 1000 samples
+Epoch 1/25
+ - 16s - loss: 1.7676 - acc: 0.4503 - val_loss: 1.0586 - val_acc: 0.6560
+Epoch 2/25
+ - 13s - loss: 1.0055 - acc: 0.6543 - val_loss: 1.0063 - val_acc: 0.6670
+Epoch 3/25
+ - 14s - loss: 0.7503 - acc: 0.7450 - val_loss: 0.8740 - val_acc: 0.6990
+Epoch 4/25
+ - 13s - loss: 0.6056 - acc: 0.7950 - val_loss: 0.8532 - val_acc: 0.7300
+Epoch 5/25
+ - 13s - loss: 0.4972 - acc: 0.8402 - val_loss: 0.8573 - val_acc: 0.7260
+Epoch 6/25
+ - 13s - loss: 0.3984 - acc: 0.8760 - val_loss: 0.8311 - val_acc: 0.7280
+Epoch 7/25
+ - 13s - loss: 0.3401 - acc: 0.8937 - val_loss: 0.8484 - val_acc: 0.7210
+Epoch 8/25
+ - 13s - loss: 0.2826 - acc: 0.9207 - val_loss: 0.8818 - val_acc: 0.7320
+Epoch 9/25
+ - 13s - loss: 0.2446 - acc: 0.9340 - val_loss: 0.8629 - val_acc: 0.7330
+Epoch 10/25
+ - 14s - loss: 0.2038 - acc: 0.9472 - val_loss: 0.8694 - val_acc: 0.7440
+Epoch 11/25
+ - 14s - loss: 0.1818 - acc: 0.9580 - val_loss: 0.8860 - val_acc: 0.7400
+Epoch 12/25
+ - 14s - loss: 0.1573 - acc: 0.9640 - val_loss: 0.9056 - val_acc: 0.7310
+Epoch 13/25
+ - 14s - loss: 0.1386 - acc: 0.9705 - val_loss: 0.8836 - val_acc: 0.7430
+Epoch 14/25
+ - 14s - loss: 0.1266 - acc: 0.9728 - val_loss: 0.8857 - val_acc: 0.7450
+Epoch 15/25
+ - 13s - loss: 0.1107 - acc: 0.9785 - val_loss: 0.9010 - val_acc: 0.7430
+Epoch 16/25
+ - 14s - loss: 0.1018 - acc: 0.9820 - val_loss: 0.9059 - val_acc: 0.7350
+Epoch 17/25
+ - 16s - loss: 0.0902 - acc: 0.9845 - val_loss: 0.9083 - val_acc: 0.7400
+Epoch 18/25
+ - 13s - loss: 0.0819 - acc: 0.9885 - val_loss: 0.9167 - val_acc: 0.7360
+Epoch 19/25
+ - 13s - loss: 0.0755 - acc: 0.9878 - val_loss: 0.9196 - val_acc: 0.7430
+Epoch 20/25
+ - 13s - loss: 0.0714 - acc: 0.9900 - val_loss: 0.9228 - val_acc: 0.7450
+Epoch 21/25
+ - 14s - loss: 0.0625 - acc: 0.9905 - val_loss: 0.9483 - val_acc: 0.7350
+Epoch 22/25
+ - 13s - loss: 0.0538 - acc: 0.9958 - val_loss: 0.9503 - val_acc: 0.7450
+Epoch 23/25
+ - 13s - loss: 0.0553 - acc: 0.9928 - val_loss: 0.9603 - val_acc: 0.7430
+Epoch 24/25
+ - 13s - loss: 0.0508 - acc: 0.9940 - val_loss: 0.9700 - val_acc: 0.7360
+Epoch 25/25
+ - 13s - loss: 0.0459 - acc: 0.9953 - val_loss: 0.9911 - val_acc: 0.7480
+
+
+
+
+
+&lt;keras.callbacks.History at 0x234c9972d30&gt;</code></pre>
+<pre class="python"><code>predicted_nn=model_custom.evaluate(features_inception_test,y_test_onehot)
+print(&quot;Accuracy on the test set: &quot;, round(predicted_nn[1],4))</code></pre>
+<pre><code>2250/2250 [==============================] - 3s 1ms/step
+Accuracy on the test set:  0.756</code></pre>
+<p>Accuracy obtained on the test set is a little bit higher than using SVM classifier.</p>
+</div>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

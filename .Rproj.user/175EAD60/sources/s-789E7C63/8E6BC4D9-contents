@@ -1,0 +1,238 @@
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(readr)
+install.packages("lubridate")
+library(lubridate)
+
+#ścieżka dostępu do danych
+setwd('F:\\Kamil\\R wiz\\praca')
+
+
+
+data01 <- read_csv("201601-citibike-tripdata.csv")
+data02 <- read_csv("201602-citibike-tripdata.csv")
+data03 <- read_csv("201603-citibike-tripdata.csv")
+data04 <- read_csv("201604-citibike-tripdata.csv")
+data05 <- read_csv("201605-citibike-tripdata.csv")
+data06 <- read_csv("201606-citibike-tripdata.csv")
+data07 <- read_csv("201607-citibike-tripdata.csv")
+data08 <- read_csv("201608-citibike-tripdata.csv")
+data09 <- read_csv("201609-citibike-tripdata.csv")
+data10 <- read_csv("201610-citibike-tripdata.csv")
+data11 <- read_csv("201611-citibike-tripdata.csv")
+data12 <- read_csv("201612-citibike-tripdata.csv")
+
+
+
+
+# zmiana nazwy kolumn w trzech miesiącach
+colnames(data10)<-names(data01)
+colnames(data11)<-names(data01)
+colnames(data12)<-names(data01)
+
+
+
+
+# zmiana formatu daty (dla ostatnich 3 miesięcy)
+
+
+data10%>%
+  separate(starttime, into=c('startdate', 'starttime'), sep=" " )%>%   #rozdzielenie na czas i datę
+  separate(stoptime, into=c("stopdate", "stoptime"), sep=" ")%>%
+  separate(startdate, into=c("startyear","startmonth", "startday"), sep="-")%>%  #rozdzielenie na dzień miesiąc i rok
+  separate(stopdate, into=c("stopyear","stopmonth", "stopday"), sep="-")%>%
+  separate(starttime, into=c("starthour", "startminute", "startsec"),sep=":")%>%  #rozdzielenie czasu na godziny
+  separate(stoptime, into=c("stophour", "stopminute", "stoptsec"),sep=":") ->data10
+
+
+
+data11%>%
+  separate(starttime, into=c('startdate', 'starttime'), sep=" " )%>%   #rozdzielenie na czas i datę
+  separate(stoptime, into=c("stopdate", "stoptime"), sep=" ")%>%
+  separate(startdate, into=c("startyear","startmonth", "startday"), sep="-")%>%  #rozdzielenie na dzień miesiąc i rok
+  separate(stopdate, into=c("stopyear","stopmonth", "stopday"), sep="-")%>%
+  separate(starttime, into=c("starthour", "startminute", "startsec"),sep=":")%>%  #rozdzielenie czasu na godziny
+  separate(stoptime, into=c("stophour", "stopminute", "stoptsec"),sep=":") ->data11
+
+
+
+data12%>%
+  separate(starttime, into=c('startdate', 'starttime'), sep=" " )%>%   #rozdzielenie na czas i datę
+  separate(stoptime, into=c("stopdate", "stoptime"), sep=" ")%>%
+  separate(startdate, into=c("startyear","startmonth", "startday"), sep="-")%>%  #rozdzielenie na dzień miesiąc i rok
+  separate(stopdate, into=c("stopyear","stopmonth", "stopday"), sep="-")%>%
+  separate(starttime, into=c("starthour", "startminute", "startsec"),sep=":")%>%  #rozdzielenie czasu na godziny
+  separate(stoptime, into=c("stophour", "stopminute", "stoptsec"),sep=":") ->data12
+
+
+
+b<-rbind(data10, data11, data12)  # zrobienie 1 bazy danych z ostatnich 3 miesięcy
+
+
+###pierwsze 9 miesięcy
+
+a<-rbind(data01, data02, data03, data04, data05, data06, data07, data08, data09) #1 baza danych z 9 miesięcy
+
+
+test<-rbind(data10,data02)
+
+
+# zmiana formatu daty (dla 9 miesięcy)
+data02%>%
+  separate(starttime, into=c('startdate', 'starttime'), sep=" " )%>%   #rozdzielenie na czas i datę
+  separate(stoptime, into=c("stopdate", "stoptime"), sep=" ")%>%
+  separate(startdate, into=c("startmonth","startday","startyear"), sep="/")%>%  #rozdzielenie na dzień miesiąc i rok
+  separate(stopdate, into=c("stopmonth","stopyear", "stopday"), sep="/")%>%
+  separate(starttime, into=c("starthour", "startminute", "startsec"),sep=":")%>%  #rozdzielenie czasu na godziny
+  separate(stoptime, into=c("stophour", "stopminute", "stoptsec"),sep=":") ->data02
+
+d12<-rbind(data01, data02)
+a<-rbind(a,b)  #połączenie w 1 bazę danych
+
+# zadanie "czas trwania wycieczek ze stacji x dla kobiet powyżej 40 roku życia"
+head(a, 200)%>%
+  filter(gender==2 & `birth year`<1976)%>%
+  group_by(`start station name`)%>% 
+  summarise_each(funs(mean), tripduration)%>%View
+
+
+
+
+
+#zadanie 2
+a[,1:12]<-lapply(a[,1:12], as.numeric)   #zapisanie kolumn jako liczby
+a%>%select(age, startmonth)%>%   #wybór potrzebnych danych    
+  filter(startmonth %in% c(1,2,3))%>%  #wybór kwartału
+  select(`birth year`)%>%     #wybór danych o roku urodzenia
+  na.omit()%>%       #odrzucenie NA
+  nrow->licznik     #liczba obserwacji (wszystkich)
+
+a%>%filter(startmonth %in% c(1,2,3))%>%   #analogincznie dla ludzi powyżej 80 r.ż.
+  select(age)%>%
+  na.omit()%>%
+  filter(`birth year`<1936)%>%
+  nrow->licznik80
+odsetek1<-licznik80/licznik   #odsetek ludzi powyżej 80. r. ż. w 1. kwartale
+
+###analogicznie dla reszty kwartałów
+a%>%select(age, startmonth)%>%
+  filter(startmonth %in% c(4,5,6))%>%select(`birth year`)%>%na.omit()%>%
+  nrow->licznik
+a%>%filter(startmonth %in% c(4,5,6))%>%
+  select(age)%>%
+  na.omit()%>%
+  filter(`birth year`<1936)%>%nrow->licznik80
+odsetek2<-licznik80/licznik
+
+
+
+
+a%>%select(age, startmonth)%>%
+  filter(startmonth %in% c(7,8,9))%>%select(`birth year`)%>%na.omit()%>%
+  nrow->licznik
+a%>%filter(startmonth %in% c(7,8,9))%>%
+  select(age)%>%
+  na.omit()%>%
+  filter(`birth year`<1936)%>%nrow->licznik80
+odsetek3<-licznik80/licznik
+
+
+a%>%select(age, startmonth)%>%
+  filter(startmonth %in% c(10,11,12))%>%select(`birth year`)%>%na.omit()%>%
+  nrow->licznik
+a%>%filter(startmonth %in% c(10,11,12))%>%
+  select(age)%>%
+  na.omit()%>%
+  filter(`birth year`<1936)%>%nrow->licznik80
+odsetek4<-licznik80/licznik
+
+
+dane2<-c(odsetek1,odsetek2, odsetek3, odsetek4)   
+dane2<-as.data.frame(dane2)   #wektor z odsetkami dla kwartałów
+
+
+###wykres
+ggplot(data=dane2)+
+  geom_col(aes(y=dane2, x=c("1. kwartał","2. kwartał","3. kwartał","4. kwartał")), fill="red")+
+  labs(x="", y="odsetek rowerzystów powyżej 80. r.ż.")+
+  theme_minimal()             
+
+
+
+
+#zad. 1
+a[,1:12]<-lapply(a[,1:12], as.numeric)  #zmiana danych na numeric
+a%>%
+  filter(starthour>1 & starthour<5 & stophour>1 & stophour<5)%>%   #wybranie godzin
+  group_by(startmonth)%>%
+  summarise(ilosc= n())%>%
+  select(2)->ilosc15  #ilość podróży w danych godzinach
+  
+a%>%group_by(startmonth)%>%
+  summarise(ilosc= n()
+            
+  )%>%select(2)->ilosc  #ilość podróży ogółem
+
+zad2<-ilosc15/ilosc   #wynik zadania 2 (odsetki)
+
+ggplot(zad2, aes(x=seq(1,12,1), y=zad2))+    #wykres
+  geom_col(fill="red")+
+  labs(x="miesiąc roku", y="odsetek podróży pomiędzy 1 a 5 rano")+
+  theme_minimal()
+
+
+
+
+
+
+
+
+dane1<-c(1,3,3,4)
+dane1<-as.data.frame(dane1)  
+
+ggplot(data=dane1)+
+  geom_col(aes(y=dane1, x=c("1. kwartał","2. kwartał","3. kwartał","4. kwartał")), fill="red")+
+  theme_minimal()
+
+
+
+
+
+# zad 3 
+
+#połączyć kolumny w datę
+
+
+a%>%unite(startdate, 2:4, sep="-")->zad3
+
+
+
+
+zad3%>%mutate(yday3=(yday(ymd(zad3$startdate))-3))%>%  #dodanie zmiennej z dniem roku
+  filter(yday3>0)->zad3   
+
+
+zad3%>%mutate(tydz=cut(yday3,breaks=seq(0,365,7)))%>%  #dodanie kolejnych tygodni 
+  group_by(tydz)%>%
+  filter(tripduration>60*60)%>%
+  summarise( n())%>%select(2)->licznik60    #ilość wycieczek powyżej 60 minut
+
+
+
+zad3%>%mutate(tydz=cut(yday3,breaks=seq(0,365,7)))%>%
+  group_by(tydz)%>%
+  summarise( n())%>%select(2)->licznikzad2    #ilość wycieczek w zależności od tygodnia
+
+zad3wynik<-licznik60/licznikzad2   #wynik zad3
+
+ggplot(data=zad3wynik, aes(x=seq(1,52,1), y=zad3))+   #wykres zad 3
+  geom_point()+
+  geom_line()+
+  theme_minimal()
+  
+
+
+
+
+  

@@ -1,0 +1,333 @@
+#zunifikowany template do modelowania
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(caTools)
+library(ROCR)
+library(caret)
+library(tidyr)
+setwd("C:/Kamil/2/R wiz")
+####wczytanie danych i bibliotek ####
+df <- read_csv("application_train.csv")
+
+
+# EDA, Podsumowanie -------------------------------------------------------
+
+df%>%summary()
+df$TARGET%>%summary()
+#target ok 0.08- imbalanced
+
+# Preprocessing -----------------------------------------------------------
+
+#obcięcie danych dla szybkości
+index_head<-createDataPartition(df$TARGET, p =0.005, list = F)
+df_small<-df[index_head,]
+df_small<-df
+#ew usunięcie
+rm(df)
+backup_prep<-df_small
+
+#usunięcie braków- input na dla tekstowych i 3 sd dla liczbowych
+df_small%>%
+  #mutate_if(is.numeric,function(x) ifelse(is.na(x), mean(x, na.rm = T), x))%>%
+  mutate_if(is.numeric,function(x) ifelse(is.na(x), mean(x, na.rm = T)+3*sd(x, na.rm=T), x))%>%   #dodanie trzech odchyleń
+  mutate_if(function(x) !is.numeric(x), function(x) ifelse(is.na(x), "na", x))->df_small
+
+
+#dummies
+
+dummies <- dummyVars(TARGET ~ ., data = df_small)
+df_small_dum<-predict(dummies, df_small)%>%as.data.frame()
+df_small_dum$TARGET<-as.factor(df_small$TARGET)
+df_small<-df_small_dum
+rm(df_small_dum)
+#potencjalnie knnimpute, PCA scaling itd
+
+#usunięcie z zerową wariancją
+df_small%>%select_if(function(x) sd(x)!=0)->df_small
+
+#zmiana nazw na poprawne
+names(df_small)= make.names(names(df_small))
+levels(df_small$TARGET)<-c("N", "Y")
+#podział na training i test
+index_train<-createDataPartition(df_small$TARGET, p=0.7, list=F)
+training<-df_small[index_train, ]
+test<-df_small[-index_train, ]
+rm(df_small)
+# Tworzenie modelu --------------------------------------------------------
+
+#kontrola treningu
+
+
+#model 1 
+
+#kontrola treningu
+tr_cont<- trainControl(method="repeatedcv", 
+                       summaryFunction = twoClassSummary,
+                       classProbs = T,
+                      repeats=2, number=2,verboseIter = T)
+#trenowanie
+model1<-train(TARGET~. , data= training,
+              method="gbm", trControl=tr_cont, 
+              metric="ROC"
+              )
+ #ROC- 0.6186 -mało
+
+model1
+plot(model1)
+densityplot(model1)
+
+varImp(model1)%>%plot()
+#dopasowanie
+
+#model 2
+model2<-train(TARGET~. , family=binomial(), data=training,
+              method="glm",
+              metric="ROC", trControl=tr_cont)
+#roc 0.5, nie beznadziejny (przez zbyt wiele wymiarów?)
+model2%>%varImp()
+
+model2%>%plot()
+
+
+model2_pred<- predict(model2, test, type="prob")[,2]
+
+library("plotROC")
+pred_rf <- predict(rf, titanic2_test, type="prob")[,2]
+
+roc.estimate <- calculate_roc(model2_pred, test$TARGET)
+roc_est<- roc(test$TARGET, model2_pred)
+auc(roc_est)
+ggroc(roc_est)+geom_abline(slope=1)
+
+a<-varImp(model2)#%>%as.data.frame()%>%rownames_to_column(var="zmienna")
+
+a$importance %>% 
+  rownames_to_column(var = "zmienna") %>% 
+  arrange(desc(Overall))%>%
+  head(20)->best_imp
+library(pROC)
+library(DALEX)
+explainer<-explain(model2)
+
+#model 2.2 - glm z 3 najlepszymi zmiennymi
+#wzięcie najlepszych z ostatniego modelu
+best_imp%>%head(3)%>%.$zmienna->best_names3
+
+formula2.2<- paste0("TARGET ~ ", paste0(best_names3, collapse=" + "))%>%as.formula()
+
+model2.2<-train( formula2.2, family=binomial(), data=training,
+              method="glm",
+              metric="ROC", trControl=tr_cont)
+model2.2_pred<-predict(model2.2, test, type="prob")[,2]
+roc_est2.2<- roc(test$TARGET, model2.2_pred)
+auc(roc_est2.2)
+ggroc(roc_est)+geom_abline(slope=1)
+
+
+#explainery
+explainer2.2 <-
+  explain(
+    model = model2.2,
+    data = training,
+    y = training$TARGET,
+    label = "model2.2"
+  )
+p_fun <- function(object, newdata){predict(object, newdata=newdata, type="prob")[,2]}
+yTest <- as.character(training$TARGET)
+yTest <- ifelse(yTest=="y",1, 0)
+
+explainer_model2.2 <- explain(model2.2, label = "2.2",
+                                       data = training, y = yTest,
+                                       predict_function = p_fun)
+explainer_model2.2%>%model_performance()->perf2.2
+perf2.2%>%plot
+
+amt_resp<-variable_response(explainer_model2.2, variable = "AMT_GOODS_PRICE", type = "pdp")
+amt_resp%>%plot()
+amt_source2<-variable_response(explainer_model2.2, variable = "EXT_SOURCE_2", type = "pdp")
+amt_source3<-variable_response(explainer_model2.2, variable = "EXT_SOURCE_3", type = "pdp")
+plot(amt_source3)
+
+#model3 - glm na 10 zmiennych
+best_imp%>%head(10)%>%.$zmienna->best_names10
+
+formula2.3<- paste0("TARGET ~ ", paste0(best_names10, collapse=" + "))%>%as.formula()
+
+model2.3<-train( formula2.3, family=binomial(), data=training,
+                 method="glm",
+                 metric="ROC", trControl=tr_cont)
+model2.3_pred<-predict(model2.3, test, type="prob")[,2]
+roc_est2.3<- roc(test$TARGET, model2.3_pred)
+auc(roc_est2.3)
+ggroc(roc_est)+geom_abline(slope=1)
+
+
+p_fun <- function(object, newdata){predict(object, newdata=newdata, type="prob")[,2]}
+yTest <- as.character(training$TARGET)
+yTest <- ifelse(yTest=="y",1, 0)
+
+explainer_model2.3 <- explain(model2.3, label = "model2.3",
+                              data = training, y = yTest,
+                              predict_function = p_fun)
+explainer_model2.3%>%model_performance()->perf2.3
+perf2.3%>%plot
+
+amt_resp2.3<-variable_response(explainer_model2.3, variable = "AMT_GOODS_PRICE", type = "pdp")
+amt_resp2.3%>%plot()
+amt_source2_2.3<-variable_response(explainer_model2.3, variable = "EXT_SOURCE_2", type = "pdp")
+amt_source3_2.3<-variable_response(explainer_model2.3, variable = "EXT_SOURCE_3", type = "pdp")
+plot(amt_source3, amt_source3_2.3)
+
+varImp(model2.3)
+
+
+#model 3 gbm na 10 najlepszych zmiennych z wcześniejszego 
+formula3<- paste0("TARGET ~ ", paste0(best_names10, collapse=" + "))%>%as.formula()
+
+model3<-train( formula3, data=training,
+                 method="gbm",
+                 metric="ROC", trControl=tr_cont)
+model3_pred<-predict(model3, test, type="prob")[,2]
+roc_est3<- roc(test$TARGET, model3_pred)
+auc(roc_est3)
+ggroc(roc_est)+geom_abline(slope=1)
+#auc 0.7325
+
+#funkcja do szybszego plotowania ROC
+roc_cust<-data.frame(sens=roc_est3$sensitivities, spec=roc_est3$specificities,
+                     thresh=roc_est3$thresholds)
+roc_cust[1,]
+nr_do_sr<-100
+
+roc_cust_new<-roc_cust%>%filter(thresh == min(thresh) )
+for (i in seq(0,1, 0.01)){
+  roc_cust_new<-rbind(roc_cust_new,roc_cust%>%filter(abs(thresh-i)== min(abs(thresh-i))))
+}
+
+ggplot(data=roc_cust_new, aes(y=sens, x=(1-spec), color=thresh))+geom_point(size=1)+
+  geom_abline(slope=1, size=1)+geom_text(aes(label=round(thresh,2)))
+
+p_fun <- function(object, newdata){predict(object, newdata=newdata, type="prob")[,2]}
+yTest <- as.character(training$TARGET)
+yTest <- ifelse(yTest=="y",1, 0)
+
+explainer_model3 <- explain(model3, label = "model3",
+                              data = training, y = yTest,
+                              predict_function = p_fun)
+explainer_model3%>%model_performance()->perf3
+perf3%>%plot
+
+amt_resp3<-variable_response(explainer_model3, variable = "AMT_GOODS_PRICE", type = "pdp")
+amt_resp3%>%plot()
+amt_source2_3<-variable_response(explainer_model3, variable = "EXT_SOURCE_2", type = "pdp")
+amt_source3_3<-variable_response(explainer_model3, variable = "EXT_SOURCE_3", type = "pdp")
+amt_source2_3%>%plot()
+library(gbm)
+varImp(model3)
+
+plot(amt_resp, amt_resp2.3, amt_resp3)
+
+
+#model 4- dodanie undersamplingu do gbm
+set.seed(9560)
+down_train <- downSample(x = training%>%select(-TARGET),
+                         y = training%>% .$TARGET)
+
+formula4<- paste0("Class ~ ", paste0(best_names10, collapse=" + "))%>%as.formula()
+
+model4<-train( formula4, data=down_train,
+               method="gbm",
+               metric="ROC", trControl=tr_cont)
+model4_pred<-predict(model4, test, type="prob")[,2]
+roc_est4<- roc(test$TARGET, model4_pred)
+auc(roc_est4)
+ggroc(roc_est)+geom_abline(slope=1)
+
+#auc tak samo jak zwykły
+
+#model 5 - gbm z większym treningiem i foldem
+tr_cont5<- trainControl(method="repeatedcv", 
+                       summaryFunction = twoClassSummary,
+                       classProbs = T,
+                       repeats=3, number=3,verboseIter = T)
+formula5<- paste0("TARGET ~ ", paste0(best_names10, collapse=" + "))%>%as.formula()
+
+model5<-train( formula5, data=training,
+               method="gbm",
+               tuneLength=5,
+               metric="ROC", trControl=tr_cont5)
+saveRDS(model5, file="model5.rds")
+rm(model5)
+gc()
+#model 6 odpalony na noc- gbm na wszystkich
+tr_cont6<- trainControl(method="repeatedcv", 
+                        summaryFunction = twoClassSummary,
+                        classProbs = T,
+                        repeats=1, number=2,verboseIter = T)
+model6<-train( TARGET~. , data=training,
+               method="gbm",
+               metric="ROC", trControl=tr_cont6)
+saveRDS(model6, "model6.rds")
+
+
+
+
+# Wybór najlepszego modelu ------------------------------------------------
+
+resampling<- resamples(list(logit_3zm= model2.2, logit_10zm = model2.3,
+                            gbm_10zm = model3))
+
+resampling%>%plot()
+summary(resampling)
+bwplot(resampling)
+
+
+
+#model 3 - transformacja z PCA
+prep_pca<-preProcess(df_small, method="pca")
+df_small_pca<-predict(prep_pca, df_small)
+prep_pca
+
+pca<-prcomp(df_small%>%select(-TARGET), center = T, scale. = T)
+
+pca%>%plot(type="l")
+summary(pca)$importance[3,]->a
+a%>%as.data.frame()%>%rownames_to_column()->a
+names(a)<- c("pca", "wart")
+a%>%select(-pca)%>%rownames_to_column()->a
+a$rowname<-as.numeric(a$rowname)
+ggplot(a, aes(x=rowname, y=wart))+geom_point()
+
+
+#model 4
+#baseline klasyfikator- drzewo decyzyjne z jednym predyktorem
+x=c(1:10)
+y= rep(0,1, 10)
+#x numeric, y klasa
+#weź min i max z x
+#na przedziale min-max co krok obliczaj 
+
+
+data.frame(x, y) %>% mutate(pred = ifelse(x > tresh, 1, 0)) %>%
+  mutate(
+    tp = ifelse(x == 1 & y == 1, 1, 0),
+    fp = ifelse(x == 1 & y == 0, 1, 0),
+    tn = ifelse(x == 0 & y == 0, 1, 0),
+    fn = ifelse(x == 0 & y == 1, 1, 0),
+    ok = ifelse(tp == 1 | tn == 1, 1, 0)
+  )->results
+
+results%>%summarise(accuracy=sum(ok)/n(), )
+
+
+
+
+
+
+
+
+#model na wszystkich gbm najlepiej n.trees=150, int=3, auc=0.751
+
+
+

@@ -1,0 +1,78 @@
+library(readr)
+library(gglot2)
+library(dplyr)
+library(tidyr)
+#library(GGally)
+
+#cites-wildlife-trade-database/comptab_2018-01-29 16_00_comma_separated.csv
+
+animals <- read_csv("F:/Kamil/R wiz/wildlife/wildlife_database.csv")
+iso <- read_csv("F:/Kamil/R wiz/wildlife/iso.txt", 
+                na = "empty", col_names = F)
+iso$X2[iso$X2=="NA"]="NAM"
+
+View(iso)
+View(animals)
+
+
+animals$Importer<-as.factor(animals$Importer)
+animals$Exporter<-as.factor(animals$Exporter)
+
+#podstawy
+mean(animals$App.== "I")
+mean(animals$App.== "II")
+mean(animals$App.== "III")
+summary(animals)
+
+
+#najwięksi importerzy
+animals%>%group_by(Importer)%>%
+  summarise(ilosc=n())%>%
+  arrange(desc(ilosc))%>%filter(ilosc>quantile(ilosc, 0.25))->a
+
+#najwięksi eksporterzy
+animals%>%group_by(Exporter)%>%
+  summarise(ilosc=n())%>%
+  arrange(desc(ilosc))%>%filter(ilosc>quantile(ilosc, 0.25))->b
+
+animals%>%group_by(Exporter, Importer)%>%
+  summarise(ilosc=n())%>%arrange(desc(ilosc))->c
+
+#TODO: flowcharty circle dla transmisji pomiędzy krajami/kontynentami
+#TODO: joiny aby móc policzyć wspólną wymianę
+
+#dodanie iso
+names(iso)[1]<-"Exporter"
+names(iso)[2]<-"exp_cont"
+animals%>%left_join(y=iso, by="Exporter")->animals
+
+#sprawdzić czy działa
+names(iso)[1]<-"Importer"
+names(iso)[2]<-"imp_cont"
+animals%>%left_join(y=iso, by="Importer")->animals
+
+#group by continent
+animals%>%group_by(exp_cont, imp_cont)%>%
+  summarise(ilosc=n())%>%arrange(desc(ilosc))->cont_all
+  
+
+#names(cont_all2)<-c("imp_cont", "exp_cont", "ilosc")
+library(circlize)
+par(mar=rep(0,4))
+
+
+fa = c("d", "f", "e", "c", "g", "b", "a")
+f1 = factor(fa)
+
+unique(animals$imp_cont)
+circos.initialize(factors = unique(animals$imp_cont))
+circos.initialize(letters[1:4], xlim = c(0, .5))
+circos.track(letters[1:4], y = c(1,2,3,5))
+circos.link("a", 0, "a", c(0.5,1))
+
+
+
+
+
+
+

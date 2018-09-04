@@ -1,0 +1,57 @@
+#install.packages("cluster")
+install.packages("factoextra")
+#install.packages("flexclust")
+#install.packages("fpc")
+#install.packages("clustertend")
+#install.packages("ClusterR")
+
+library(cluster)
+library(ggplot2)
+library(dplyr)
+library(ggfortify)
+library(factoextra)
+
+
+library(flexclust)
+library(fpc)
+library(cluster)
+library(clustertend)
+library(ClusterR)
+
+# changing the path for accessing the Working Directory
+
+setwd("F:\\Kamil\\R wiz\\ZIMA WINTER Unsupervised Learning\\ZIMA WINTER Unsupervised Learning")
+
+
+#import of data
+data<-read.csv("cluster.csv", sep=";", dec=",", header=TRUE) 
+
+a<-data[,c(25,32)]
+km1 <- kmeans(a, 2) 
+
+
+
+a%>%mutate(label=km1$cluster)->a
+a$label<-as.factor(a$label)
+
+ggplot(a)+geom_point(aes(x=XA06, y=XA31, color=label))
+
+fviz_cluster(km1, data=a, ellipse.type = "norm", geom = c("point"))
+
+
+
+pamy<-cluster::pam(a,3)
+
+fviz_cluster(pamy, geom=c("point"))
+
+
+clara=cluster::clara(a,3)
+
+fviz_cluster(clara, geom="point")
+
+
+fviz_nbclust(a, FUNcluster =pam)
+
+
+
+

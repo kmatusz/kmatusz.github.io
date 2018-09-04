@@ -5,4 +5,6 @@ navbar:
   left:
   - text: "Writing"
     href: rmd2.html
+  - text: "Writing"
+    href: cifar-analysis.html
 output: html_document

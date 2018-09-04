@@ -1,0 +1,64 @@
+library(readr)
+terroryzm <- read_delim("F:/Kamil/R wiz/terroryzm.csv", 
+                        ";", escape_double = FALSE, trim_ws = TRUE)
+View(terroryzm)
+
+
+library(ggplot2)
+library(dplyr)
+terroryzm$iyear<-as.factor(terroryzm$iyear)
+
+
+europa<-terroryzm%>%filter(region==8| region==9)%>%filter(iyear>2000)
+
+#liczba od lat
+bufor<-table(europa$iyear)%>%as.data.frame()
+
+ggplot(data=bufor, aes(x=Var1, y=Freq, group=1))+
+  geom_point()+
+  geom_line()
+
+a<-table(europa$country_txt)%>%as.data.frame()
+a<-arrange(a, Freq)
+a$Var1<-as.character(a$Var1)
+a$Var1<-as.factor(a$Var1)
+
+a$Var1 <- factor(a$Var1, levels = a$Var1)
+
+
+
+ggplot(data = a, aes(x=Var1, y=Freq))+geom_col(fill="magenta")+
+  theme(axis.text.x = element_text(angle = 45 ))
+
+
+europa$gname%>%table()%>%as.data.frame()%>%arrange(Freq)->grupy
+grupy$.<-as.character(grupy$.)
+
+grupy$.<-factor(grupy$., levels  = grupy$.)
+
+
+
+
+muslim<-europa%>%filter(gname=="Muslim extremists")
+a<-table(muslim$iyear)
+plot(a)
+ggplot(data = muslim, aes(x=, y=Freq))
+
+
+
+
+
+
+ggplot(data=a, aes(x=V2, y=V1, group=1))+geom_point(size=1)+geom_line()
+
+
+table(europa$country_txt)
+
+
+
+
+
+
+
+
+
