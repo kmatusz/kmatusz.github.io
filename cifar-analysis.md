@@ -1,6 +1,8 @@
 
 # CIFAR-10 images classification challenge
 
+In this notebook you can find my approach to classic CIFAR-10 challenge. The goal is to guess the class of the image shown, out of 10 classes possible. This is a perfect playground for using advanced deep neural nets. Unfortunately I didn't have access to a GPU, and because of that I struggled with slow computation times. To deal with this problem I used only 1/10 of the dataset. Using the best model I achieved 0.76 accuracy, which isn't very high score compared to state-of-the-art solutions. The reason for that is high overfitting in my model, which was caused by small training size. 
+
 ## Loading data and checking structure
 
 Let's do some exploratory data analysis. First we'll load the data from the files downloaded from CIFAR website.
@@ -157,67 +159,14 @@ del x_left
 del y_left
 del x
 del y
-x_train.shape
+
 ```
 
-
-
-
-    (5000, 3072)
 
 
 
 #### Wisualising the images
 
-
-```python
-a = Image.open("a.jpg")
-a.load()
-a=np.asarray(a, dtype= "int32")
-a=[a]
-a
-```
-
-
-```python
-prep_kot = preprocess_inception(a)
-```
-
-    Image data reshaped
-    Model created
-    image resized to suit inception model
-    
-
-    C:\ProgramData\Anaconda3\lib\site-packages\skimage\transform\_warps.py:84: UserWarning: The default mode, 'constant', will be changed to 'reflect' in skimage 0.15.
-      warn("The default mode, 'constant', will be changed to 'reflect' in "
-    
-
-    1/1 [==============================] - 2s 2s/step
-    features predicted
-    features reshaped to suit sklearn models
-    total time:   34.12488412857056  s
-    
-
-
-```python
-
-```
-
-
-
-
-    (1, 18432)
-
-
-
-
-```python
-a = resize(a, (139, 139, 3))
-```
-
-    C:\ProgramData\Anaconda3\lib\site-packages\skimage\transform\_warps.py:84: UserWarning: The default mode, 'constant', will be changed to 'reflect' in skimage 0.15.
-      warn("The default mode, 'constant', will be changed to 'reflect' in "
-    
 
 
 ```python
@@ -283,8 +232,6 @@ features_hog_train=compute_hog(features_hog_train)
 features_hog_test=compute_hog(features_hog_test)
 ```
 
-    C:\ProgramData\Anaconda3\lib\site-packages\skimage\feature\_hog.py:119: skimage_deprecation: Default value of `block_norm`==`L1` is deprecated and will be changed to `L2-Hys` in v0.15
-      'be changed to `L2-Hys` in v0.15', skimage_deprecation)
     
 
 
@@ -328,19 +275,7 @@ features_inception_train = preprocess_inception(x_train)
 ```
 
 
-    ---------------------------------------------------------------------------
 
-    NameError                                 Traceback (most recent call last)
-
-    <ipython-input-20-733c01e470f1> in <module>()
-          2 #features_inception_train = np.load("backups/features_inception_train.npy")
-          3 #features_inception_test = np.load("backups/features_inception_test.npy")
-    ----> 4 features_inception_test = preprocess_inception(x_test)
-          5 features_inception_train = preprocess_inception(x_train)
-          6 #np.save("backups/features_inception_train.npy", features_inception_train)
-    
-
-    NameError: name 'x_test' is not defined
 
 
 #### Using t-sne technique to visualise CNN codes
@@ -383,8 +318,6 @@ plt.title("Features projection using t-SNE technique")
 
 
 
-    Text(0.5,1,'Features projection using t-SNE technique')
-
 
 
 
@@ -422,14 +355,14 @@ inception_predicted_train = fitted_inception.predict(features_inception_train)
 inception_predicted_test = fitted_inception.predict(features_inception_test)
 print('Accuracy on the training set:', round(accuracy_score(inception_predicted_train, np.asarray(y_train)),4))
 print('Accuracy on the test set:', round(accuracy_score(inception_predicted_test, np.asarray(y_test)),4))
-#print(confusion_matrix(inception_predicted_train, np.asarray(y_train)))
+
 ```
 
     Accuracy on the training set: 0.9998
     Accuracy on the test set: 0.7271
     
 
-Such high accuracy on the training set and relatively low on the test set indicate the overfitting problem. In this case the best solution would be to gather more data. As it's not feasible in this case (due to high memory usage), changing hyperparameter C would be the best idea. The intuition says that lowering it would help so I'm going to use cross validation to select the best value. 
+Such high accuracy on the training set and relatively low on the test set indicate the overfitting problem. In this case the best solution would be to gather more data. As it's not feasible in this case (due to high memory usage), changing hyperparameter C would be the best idea. Intuition says that lowering it would help so I'm going to use cross validation to select the best value. 
 
 
 #### Using random CV to select best parameters
@@ -447,11 +380,6 @@ model_gridCV.cv_results_
     
 
     [Parallel(n_jobs=-1)]: Done   8 out of   8 | elapsed:  3.4min finished
-    
-
-    [LibLinear]
-
-
 
 
     {'mean_fit_time': array([47.59077573, 62.03595328, 73.71247494, 59.59823513]),
@@ -493,9 +421,6 @@ plt.ylabel('Cumulative explained variance')
 
 
 
-    Text(0,0.5,'Cumulative explained variance')
-
-
 
 
 ![png](cifar-analysis_files\cifar-analysis_51_1.png)
@@ -528,7 +453,6 @@ predicted_svm_pca = fitted_inception_pca.predict(pca_reduced_test/to_norm_pca)
 ```
 
     model created
-    [LibLinear]
 
 
 ```python
@@ -574,62 +498,10 @@ model_custom.fit(features_inception_train, y_train_onehot, epochs=25, batch_size
 ```
 
     Train on 4000 samples, validate on 1000 samples
-    Epoch 1/25
-     - 16s - loss: 1.7676 - acc: 0.4503 - val_loss: 1.0586 - val_acc: 0.6560
-    Epoch 2/25
-     - 13s - loss: 1.0055 - acc: 0.6543 - val_loss: 1.0063 - val_acc: 0.6670
-    Epoch 3/25
-     - 14s - loss: 0.7503 - acc: 0.7450 - val_loss: 0.8740 - val_acc: 0.6990
-    Epoch 4/25
-     - 13s - loss: 0.6056 - acc: 0.7950 - val_loss: 0.8532 - val_acc: 0.7300
-    Epoch 5/25
-     - 13s - loss: 0.4972 - acc: 0.8402 - val_loss: 0.8573 - val_acc: 0.7260
-    Epoch 6/25
-     - 13s - loss: 0.3984 - acc: 0.8760 - val_loss: 0.8311 - val_acc: 0.7280
-    Epoch 7/25
-     - 13s - loss: 0.3401 - acc: 0.8937 - val_loss: 0.8484 - val_acc: 0.7210
-    Epoch 8/25
-     - 13s - loss: 0.2826 - acc: 0.9207 - val_loss: 0.8818 - val_acc: 0.7320
-    Epoch 9/25
-     - 13s - loss: 0.2446 - acc: 0.9340 - val_loss: 0.8629 - val_acc: 0.7330
-    Epoch 10/25
-     - 14s - loss: 0.2038 - acc: 0.9472 - val_loss: 0.8694 - val_acc: 0.7440
-    Epoch 11/25
-     - 14s - loss: 0.1818 - acc: 0.9580 - val_loss: 0.8860 - val_acc: 0.7400
-    Epoch 12/25
-     - 14s - loss: 0.1573 - acc: 0.9640 - val_loss: 0.9056 - val_acc: 0.7310
-    Epoch 13/25
-     - 14s - loss: 0.1386 - acc: 0.9705 - val_loss: 0.8836 - val_acc: 0.7430
-    Epoch 14/25
-     - 14s - loss: 0.1266 - acc: 0.9728 - val_loss: 0.8857 - val_acc: 0.7450
-    Epoch 15/25
-     - 13s - loss: 0.1107 - acc: 0.9785 - val_loss: 0.9010 - val_acc: 0.7430
-    Epoch 16/25
-     - 14s - loss: 0.1018 - acc: 0.9820 - val_loss: 0.9059 - val_acc: 0.7350
-    Epoch 17/25
-     - 16s - loss: 0.0902 - acc: 0.9845 - val_loss: 0.9083 - val_acc: 0.7400
-    Epoch 18/25
-     - 13s - loss: 0.0819 - acc: 0.9885 - val_loss: 0.9167 - val_acc: 0.7360
-    Epoch 19/25
-     - 13s - loss: 0.0755 - acc: 0.9878 - val_loss: 0.9196 - val_acc: 0.7430
-    Epoch 20/25
-     - 13s - loss: 0.0714 - acc: 0.9900 - val_loss: 0.9228 - val_acc: 0.7450
-    Epoch 21/25
-     - 14s - loss: 0.0625 - acc: 0.9905 - val_loss: 0.9483 - val_acc: 0.7350
-    Epoch 22/25
-     - 13s - loss: 0.0538 - acc: 0.9958 - val_loss: 0.9503 - val_acc: 0.7450
-    Epoch 23/25
-     - 13s - loss: 0.0553 - acc: 0.9928 - val_loss: 0.9603 - val_acc: 0.7430
-    Epoch 24/25
-     - 13s - loss: 0.0508 - acc: 0.9940 - val_loss: 0.9700 - val_acc: 0.7360
     Epoch 25/25
      - 13s - loss: 0.0459 - acc: 0.9953 - val_loss: 0.9911 - val_acc: 0.7480
     
 
-
-
-
-    <keras.callbacks.History at 0x234c9972d30>
 
 
 

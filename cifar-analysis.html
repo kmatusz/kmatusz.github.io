@@ -204,6 +204,7 @@ $(document).ready(function () {
 
 <div id="cifar-10-images-classification-challenge" class="section level1">
 <h1>CIFAR-10 images classification challenge</h1>
+<p>In this notebook you can find my approach to classic CIFAR-10 challenge. The goal is to guess the class of the image shown, out of 10 classes possible. This is a perfect playground for using advanced deep neural nets. Unfortunately I didn’t have access to a GPU, and because of that I struggled with slow computation times. To deal with this problem I used only 1/10 of the dataset. Using the best model I achieved 0.76 accuracy, which isn’t very high score compared to state-of-the-art solutions. The reason for that is high overfitting in my model, which was caused by small training size.</p>
 <div id="loading-data-and-checking-structure" class="section level2">
 <h2>Loading data and checking structure</h2>
 <p>Let’s do some exploratory data analysis. First we’ll load the data from the files downloaded from CIFAR website.</p>
@@ -321,8 +322,7 @@ del x_left
 del y_left
 del x
 del y
-x_train.shape</code></pre>
-<pre><code>(5000, 3072)</code></pre>
+</code></pre>
 </div>
 <div id="wisualising-the-images" class="section level4">
 <h4>Wisualising the images</h4>
@@ -337,19 +337,14 @@ Model created
 image resized to suit inception model
 
 
-C:\ProgramData\Anaconda3\lib\site-packages\skimage\transform\_warps.py:84: UserWarning: The default mode, &#39;constant&#39;, will be changed to &#39;reflect&#39; in skimage 0.15.
-  warn(&quot;The default mode, &#39;constant&#39;, will be changed to &#39;reflect&#39; in &quot;
+
 
 
 1/1 [==============================] - 2s 2s/step
 features predicted
 features reshaped to suit sklearn models
 total time:   34.12488412857056  s</code></pre>
-<pre class="python"><code></code></pre>
-<pre><code>(1, 18432)</code></pre>
 <pre class="python"><code>a = resize(a, (139, 139, 3))</code></pre>
-<pre><code>C:\ProgramData\Anaconda3\lib\site-packages\skimage\transform\_warps.py:84: UserWarning: The default mode, &#39;constant&#39;, will be changed to &#39;reflect&#39; in skimage 0.15.
-  warn(&quot;The default mode, &#39;constant&#39;, will be changed to &#39;reflect&#39; in &quot;</code></pre>
 <pre class="python"><code>%matplotlib inline
 examples_indexes=[]
 for number in range(0,11):
@@ -397,8 +392,6 @@ selected only reshaping mode</code></pre>
     return hog_features</code></pre>
 <pre class="python"><code>features_hog_train=compute_hog(features_hog_train)
 features_hog_test=compute_hog(features_hog_test)</code></pre>
-<pre><code>C:\ProgramData\Anaconda3\lib\site-packages\skimage\feature\_hog.py:119: skimage_deprecation: Default value of `block_norm`==`L1` is deprecated and will be changed to `L2-Hys` in v0.15
-  &#39;be changed to `L2-Hys` in v0.15&#39;, skimage_deprecation)</code></pre>
 <pre class="python"><code>#creating shallow classifier using hog features
 hog_clf = LinearSVC(C=2)
 hog_fitted = hog_clf.fit(features_hog_train, np.asarray(y_train))  
@@ -420,19 +413,7 @@ features_inception_test = preprocess_inception(x_test)
 features_inception_train = preprocess_inception(x_train)
 #np.save(&quot;backups/features_inception_train.npy&quot;, features_inception_train)
 #np.save(&quot;backups/features_inception_test.npy&quot;, features_inception_test)</code></pre>
-<pre><code>---------------------------------------------------------------------------
-
-NameError                                 Traceback (most recent call last)
-
-&lt;ipython-input-20-733c01e470f1&gt; in &lt;module&gt;()
-      2 #features_inception_train = np.load(&quot;backups/features_inception_train.npy&quot;)
-      3 #features_inception_test = np.load(&quot;backups/features_inception_test.npy&quot;)
-----&gt; 4 features_inception_test = preprocess_inception(x_test)
-      5 features_inception_train = preprocess_inception(x_train)
-      6 #np.save(&quot;backups/features_inception_train.npy&quot;, features_inception_train)
-
-
-NameError: name &#39;x_test&#39; is not defined</code></pre>
+<pre><code>---------------------------------------------------------------------------</code></pre>
 </div>
 <div id="using-t-sne-technique-to-visualise-cnn-codes" class="section level4">
 <h4>Using t-sne technique to visualise CNN codes</h4>
@@ -456,7 +437,6 @@ sns.lmplot(x=&#39;x1&#39;, y=&#39;x2&#39;,
            scatter_kws={&quot;s&quot;: 5}
                 )
 plt.title(&quot;Features projection using t-SNE technique&quot;)</code></pre>
-<pre><code>Text(0.5,1,&#39;Features projection using t-SNE technique&#39;)</code></pre>
 <div class="figure">
 <img src="cifar-analysis_files/cifar-analysis_38_1.png" alt="png" />
 <p class="caption">png</p>
@@ -478,7 +458,7 @@ print(&quot;Model fitted. Total fitting time: &quot;, time.time()-time_start, &q
 inception_predicted_test = fitted_inception.predict(features_inception_test)
 print(&#39;Accuracy on the training set:&#39;, round(accuracy_score(inception_predicted_train, np.asarray(y_train)),4))
 print(&#39;Accuracy on the test set:&#39;, round(accuracy_score(inception_predicted_test, np.asarray(y_test)),4))
-#print(confusion_matrix(inception_predicted_train, np.asarray(y_train)))</code></pre>
+</code></pre>
 <pre><code>Accuracy on the training set: 0.9998
 Accuracy on the test set: 0.7271</code></pre>
 <p>Such high accuracy on the training set and relatively low on the test set indicate the overfitting problem. In this case the best solution would be to gather more data. As it’s not feasible in this case (due to high memory usage), changing hyperparameter C would be the best idea. The intuition says that lowering it would help so I’m going to use cross validation to select the best value.</p>
@@ -494,11 +474,6 @@ model_gridCV.cv_results_</code></pre>
 
 
 [Parallel(n_jobs=-1)]: Done   8 out of   8 | elapsed:  3.4min finished
-
-
-[LibLinear]
-
-
 
 
 {&#39;mean_fit_time&#39;: array([47.59077573, 62.03595328, 73.71247494, 59.59823513]),
@@ -529,7 +504,6 @@ plt.plot(np.cumsum(pca.explained_variance_ratio_))
 plt.xlabel(&#39;Number of components&#39;)
 plt.ylabel(&#39;Cumulative explained variance&#39;)
 </code></pre>
-<pre><code>Text(0,0.5,&#39;Cumulative explained variance&#39;)</code></pre>
 <div class="figure">
 <img src="cifar-analysis_files/cifar-analysis_51_1.png" alt="png" />
 <p class="caption">png</p>
@@ -546,8 +520,7 @@ print(&quot;model created&quot;)
 fitted_inception_pca = clf_pca.fit(pca_reduced_train/to_norm_pca, np.asarray(y_train))  
 
 predicted_svm_pca = fitted_inception_pca.predict(pca_reduced_test/to_norm_pca)</code></pre>
-<pre><code>model created
-[LibLinear]</code></pre>
+<pre><code>model created</code></pre>
 <pre class="python"><code>print(&quot;Accuracy: &quot;,round(accuracy_score(predicted_svm_pca, y_test),4))
 #accuracy is lower than using data without pca transformation</code></pre>
 <pre><code>Accuracy:  0.7271</code></pre>
@@ -574,62 +547,8 @@ model_custom.compile(loss=&#39;categorical_crossentropy&#39;,
               metrics=[&#39;accuracy&#39;])</code></pre>
 <pre class="python"><code>model_custom.fit(features_inception_train, y_train_onehot, epochs=25, batch_size=50, verbose=2, validation_split=0.2)</code></pre>
 <pre><code>Train on 4000 samples, validate on 1000 samples
-Epoch 1/25
- - 16s - loss: 1.7676 - acc: 0.4503 - val_loss: 1.0586 - val_acc: 0.6560
-Epoch 2/25
- - 13s - loss: 1.0055 - acc: 0.6543 - val_loss: 1.0063 - val_acc: 0.6670
-Epoch 3/25
- - 14s - loss: 0.7503 - acc: 0.7450 - val_loss: 0.8740 - val_acc: 0.6990
-Epoch 4/25
- - 13s - loss: 0.6056 - acc: 0.7950 - val_loss: 0.8532 - val_acc: 0.7300
-Epoch 5/25
- - 13s - loss: 0.4972 - acc: 0.8402 - val_loss: 0.8573 - val_acc: 0.7260
-Epoch 6/25
- - 13s - loss: 0.3984 - acc: 0.8760 - val_loss: 0.8311 - val_acc: 0.7280
-Epoch 7/25
- - 13s - loss: 0.3401 - acc: 0.8937 - val_loss: 0.8484 - val_acc: 0.7210
-Epoch 8/25
- - 13s - loss: 0.2826 - acc: 0.9207 - val_loss: 0.8818 - val_acc: 0.7320
-Epoch 9/25
- - 13s - loss: 0.2446 - acc: 0.9340 - val_loss: 0.8629 - val_acc: 0.7330
-Epoch 10/25
- - 14s - loss: 0.2038 - acc: 0.9472 - val_loss: 0.8694 - val_acc: 0.7440
-Epoch 11/25
- - 14s - loss: 0.1818 - acc: 0.9580 - val_loss: 0.8860 - val_acc: 0.7400
-Epoch 12/25
- - 14s - loss: 0.1573 - acc: 0.9640 - val_loss: 0.9056 - val_acc: 0.7310
-Epoch 13/25
- - 14s - loss: 0.1386 - acc: 0.9705 - val_loss: 0.8836 - val_acc: 0.7430
-Epoch 14/25
- - 14s - loss: 0.1266 - acc: 0.9728 - val_loss: 0.8857 - val_acc: 0.7450
-Epoch 15/25
- - 13s - loss: 0.1107 - acc: 0.9785 - val_loss: 0.9010 - val_acc: 0.7430
-Epoch 16/25
- - 14s - loss: 0.1018 - acc: 0.9820 - val_loss: 0.9059 - val_acc: 0.7350
-Epoch 17/25
- - 16s - loss: 0.0902 - acc: 0.9845 - val_loss: 0.9083 - val_acc: 0.7400
-Epoch 18/25
- - 13s - loss: 0.0819 - acc: 0.9885 - val_loss: 0.9167 - val_acc: 0.7360
-Epoch 19/25
- - 13s - loss: 0.0755 - acc: 0.9878 - val_loss: 0.9196 - val_acc: 0.7430
-Epoch 20/25
- - 13s - loss: 0.0714 - acc: 0.9900 - val_loss: 0.9228 - val_acc: 0.7450
-Epoch 21/25
- - 14s - loss: 0.0625 - acc: 0.9905 - val_loss: 0.9483 - val_acc: 0.7350
-Epoch 22/25
- - 13s - loss: 0.0538 - acc: 0.9958 - val_loss: 0.9503 - val_acc: 0.7450
-Epoch 23/25
- - 13s - loss: 0.0553 - acc: 0.9928 - val_loss: 0.9603 - val_acc: 0.7430
-Epoch 24/25
- - 13s - loss: 0.0508 - acc: 0.9940 - val_loss: 0.9700 - val_acc: 0.7360
 Epoch 25/25
- - 13s - loss: 0.0459 - acc: 0.9953 - val_loss: 0.9911 - val_acc: 0.7480
-
-
-
-
-
-&lt;keras.callbacks.History at 0x234c9972d30&gt;</code></pre>
+ - 13s - loss: 0.0459 - acc: 0.9953 - val_loss: 0.9911 - val_acc: 0.7480</code></pre>
 <pre class="python"><code>predicted_nn=model_custom.evaluate(features_inception_test,y_test_onehot)
 print(&quot;Accuracy on the test set: &quot;, round(predicted_nn[1],4))</code></pre>
 <pre><code>2250/2250 [==============================] - 3s 1ms/step
