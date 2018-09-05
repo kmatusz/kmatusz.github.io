@@ -1,0 +1,5 @@
+"0","dummies <- dummyVars(TARGET ~ ., data = df_small)"
+"0","df_small_dum<-predict(dummies, df_small)%>%as.data.frame()"
+"0","df_small_dum$TARGET<-as.factor(df_small$TARGET)"
+"0","df_small<-df_small_dum"
+"0","rm(df_small_dum)"

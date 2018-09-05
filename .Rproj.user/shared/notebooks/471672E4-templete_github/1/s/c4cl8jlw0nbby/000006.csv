@@ -1,0 +1,21 @@
+"0","df <- read_csv(""Loan-Prediction-III-master/Train.csv"")"
+"2","Parsed with column specification:
+cols(
+  Loan_ID = col_character(),
+  Gender = col_character(),
+  Married = col_character(),
+  Dependents = col_character(),
+  Education = col_character(),
+  Self_Employed = col_character(),
+  ApplicantIncome = col_integer(),
+  CoapplicantIncome = col_double(),
+  LoanAmount = col_integer(),
+  Loan_Amount_Term = col_integer(),
+  Credit_History = col_integer(),
+  Property_Area = col_character(),
+  Loan_Status = col_character()
+)
+"
+"0","df<-df%>%select(-Loan_ID)"
+"0","name_target<-""Loan_Status"""
+"0","names(df)[which(names(df)==name_target)]<-""TARGET"""

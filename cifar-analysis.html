@@ -184,7 +184,10 @@ $(document).ready(function () {
   <a href="rmd2.html">Writing</a>
 </li>
 <li>
-  <a href="cifar-analysis.html">Writing</a>
+  <a href="cifar-analysis.html">Cifar-10</a>
+</li>
+<li>
+  <a href="template_modelling.html">ML template</a>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -326,25 +329,6 @@ del y
 </div>
 <div id="wisualising-the-images" class="section level4">
 <h4>Wisualising the images</h4>
-<pre class="python"><code>a = Image.open(&quot;a.jpg&quot;)
-a.load()
-a=np.asarray(a, dtype= &quot;int32&quot;)
-a=[a]
-a</code></pre>
-<pre class="python"><code>prep_kot = preprocess_inception(a)</code></pre>
-<pre><code>Image data reshaped
-Model created
-image resized to suit inception model
-
-
-
-
-
-1/1 [==============================] - 2s 2s/step
-features predicted
-features reshaped to suit sklearn models
-total time:   34.12488412857056  s</code></pre>
-<pre class="python"><code>a = resize(a, (139, 139, 3))</code></pre>
 <pre class="python"><code>%matplotlib inline
 examples_indexes=[]
 for number in range(0,11):
@@ -413,7 +397,6 @@ features_inception_test = preprocess_inception(x_test)
 features_inception_train = preprocess_inception(x_train)
 #np.save(&quot;backups/features_inception_train.npy&quot;, features_inception_train)
 #np.save(&quot;backups/features_inception_test.npy&quot;, features_inception_test)</code></pre>
-<pre><code>---------------------------------------------------------------------------</code></pre>
 </div>
 <div id="using-t-sne-technique-to-visualise-cnn-codes" class="section level4">
 <h4>Using t-sne technique to visualise CNN codes</h4>
@@ -461,7 +444,7 @@ print(&#39;Accuracy on the test set:&#39;, round(accuracy_score(inception_predic
 </code></pre>
 <pre><code>Accuracy on the training set: 0.9998
 Accuracy on the test set: 0.7271</code></pre>
-<p>Such high accuracy on the training set and relatively low on the test set indicate the overfitting problem. In this case the best solution would be to gather more data. As it’s not feasible in this case (due to high memory usage), changing hyperparameter C would be the best idea. The intuition says that lowering it would help so I’m going to use cross validation to select the best value.</p>
+<p>Such high accuracy on the training set and relatively low on the test set indicate the overfitting problem. In this case the best solution would be to gather more data. As it’s not feasible in this case (due to high memory usage), changing hyperparameter C would be the best idea. Intuition says that lowering it would help so I’m going to use cross validation to select the best value.</p>
 </div>
 <div id="using-random-cv-to-select-best-parameters" class="section level4">
 <h4>Using random CV to select best parameters</h4>

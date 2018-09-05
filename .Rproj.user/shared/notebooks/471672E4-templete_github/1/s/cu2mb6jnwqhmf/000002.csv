@@ -1,0 +1,19 @@
+"0","library(gbm)
+"
+"2","£adowanie wymaganego pakietu: survival
+"
+"2","
+Do³¹czanie pakietu: ‘survival’
+
+"
+"2","Nastêpuj¹cy obiekt zosta³ zakryty z ‘package:caret’:
+
+    cluster
+
+"
+"2","£adowanie wymaganego pakietu: splines
+"
+"2","£adowanie wymaganego pakietu: parallel
+"
+"2","Loaded gbm 2.1.3
+"

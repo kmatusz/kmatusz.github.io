@@ -1,0 +1,4 @@
+"0","df <- read.csv(""Train.csv"", stringsAsFactors = F)"
+"0","df<-df%>%select(-Loan_ID)"
+"0","name_target<-""Loan_Status"""
+"0","names(df)[which(names(df)==name_target)]<-""TARGET"""
