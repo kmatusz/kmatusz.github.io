@@ -96,7 +96,8 @@ tr_cont<- trainControl(method="repeatedcv",
 #### Model 1- gbm
 ```{r}
 model1<-train(TARGET~. , data= training,
-              method="gbm", 
+              method="gbm",
+              verbose=F,
               #metric="ROC",
               trControl=tr_cont
               )
