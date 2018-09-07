@@ -308,19 +308,19 @@ tr_cont&lt;- trainControl(method=&quot;repeatedcv&quot;,
 ## 
 ## No pre-processing
 ## Resampling: Cross-Validated (2 fold, repeated 2 times) 
-## Summary of sample sizes: 216, 215, 215, 216 
+## Summary of sample sizes: 215, 216, 215, 216 
 ## Resampling results across tuning parameters:
 ## 
 ##   interaction.depth  n.trees  Accuracy   Kappa    
-##   1                   50      0.7981481  0.4409209
-##   1                  100      0.7830642  0.4142043
-##   1                  150      0.7703004  0.3911260
-##   2                   50      0.7842054  0.4239645
-##   2                  100      0.7644972  0.3860660
-##   2                  150      0.7459356  0.3515808
-##   3                   50      0.7691322  0.3947870
-##   3                  100      0.7621716  0.3880412
-##   3                  150      0.7598514  0.3932064
+##   1                   50      0.8201604  0.5143957
+##   1                  100      0.8155308  0.5066546
+##   1                  150      0.8108850  0.4963489
+##   2                   50      0.8120317  0.4988939
+##   2                  100      0.7899978  0.4589649
+##   2                  150      0.7911606  0.4664259
+##   3                   50      0.8027724  0.4810743
+##   3                  100      0.7911660  0.4636118
+##   3                  150      0.7783969  0.4417704
 ## 
 ## Tuning parameter &#39;shrinkage&#39; was held constant at a value of 0.1
 ## 
@@ -354,7 +354,7 @@ tr_cont&lt;- trainControl(method=&quot;repeatedcv&quot;,
 ## Resampling results:
 ## 
 ##   Accuracy   Kappa    
-##   0.7725937  0.3952007</code></pre>
+##   0.8143842  0.5122778</code></pre>
 <pre class="r"><code>varImp(model2)%&gt;%plot()</code></pre>
 <p><img src="template_modelling_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
 <p>… and so on. Once the schema is right, adding new models to test is as easy as copying few lines and changing name of the model.</p>

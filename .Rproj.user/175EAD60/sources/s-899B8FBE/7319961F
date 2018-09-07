@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1536228634316.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "7319961F",
+    "lastKnownWriteTime" : 1536278872,
+    "last_content_update" : 1536278872689,
+    "path" : "C:/rwiz/warszawa19115/eda.R",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "119,0",
+        "scrollLine" : "0",
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

@@ -1,0 +1,7 @@
+"0","ggplot(df%>%filter(district=='Mokotów')%>%"
+"0","    group_by(subcategory_bin)%>%"
+"0","    summarise(Freq=n()), "
+"0","  aes(x=reorder(subcategory_bin, Freq), y=Freq, fill=reorder(subcategory_bin, Freq)))+"
+"0","  geom_bar(stat = 'identity')+coord_flip()+"
+"0","  labs(x='Typ zgłoszenia', y='Ilość zgłoszeń')+"
+"0","  theme_minimal()"

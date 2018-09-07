@@ -1,0 +1,7 @@
+"0","ggplot(df%>%filter(district=='Mokotów' & subcategory=='Śmieci')%>%"
+"0","         mutate(week=week(createDate))%>%"
+"0","         group_by(week)%>%summarise(a=n()),"
+"0","       aes(x=week, y=a))+"
+"0","  geom_line(size=1.2)+"
+"0","  labs(x='Tydzień', y='Liczba zgłoszeń', title='Licza zgłoszeń dotyczących śmieci na Mokotowie')+"
+"0","  theme_minimal()"

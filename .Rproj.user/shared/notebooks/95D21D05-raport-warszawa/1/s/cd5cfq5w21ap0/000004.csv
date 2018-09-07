@@ -1,0 +1,7 @@
+"0","#dzielnica"
+"0","ggplot(df$district%>%table()%>%as.data.frame(), "
+"0","       aes(x=reorder(., Freq), y=Freq, fill=reorder(., Freq)))+"
+"0","  geom_bar(stat = 'identity')+"
+"0","  coord_flip()+"
+"0","  labs(x='Ilość zgłoszeń', y='Dzielnica', title='Ilość zgłoszeń w zależności od dzielnicy')+"
+"0","  guides(fill=FALSE)"

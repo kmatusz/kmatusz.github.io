@@ -1,0 +1,94 @@
+
+
+setwd("C:\\Users\\Kamil Matuszelański\\warszawa")
+library(leaflet)
+library(plyr)
+library(rvest)
+library(tidyverse)
+library(jsonlite)
+library(lubridate)
+
+as.numeric(as.POSIXct("2018-07-01 2:13:46 EST"))
+
+as.numeric(as.POSIXct("2017-02-03 2:13:46 EST"))
+
+
+as.Date(15342, origin="1970-01-01")
+val = as.numeric(as.POSIXct("2018-07-01 2:13:46 EST"))
+val = 1483233226
+data = as.POSIXct(val, origin="1970-01-01")
+as.numeric(data)
+as.Date(15133, origin="1970-01-01")
+
+
+
+from = as.numeric(as.POSIXct("2018-07-01 2:13:46 EST"))
+to = as.numeric(as.POSIXct("2018-07-02 2:13:46 EST"))
+http = sprintf("https://api.um.warszawa.pl/api/action/19115store_getNotificationsForDate/?id=28dc65ad-fff5-447b-99a3-95b71b4a7d1e&dateFrom=%s000&dateTo=%s000&apikey=%s"
+  , from, to, apikey)
+http
+
+
+strona = readLines(http)
+df = fromJSON(strona)
+df=df$result
+df= df$result
+df= df$notifications
+sprintf("%02d", 10)
+
+apikey = "840fa06b-a4ea-40ff-9d83-9d68dab180a9"
+df_finish<- data.frame()
+for (i in 1:31){
+  day= sprintf("%02d", i)
+  from = as.numeric(as.POSIXct(sprintf("2018-05-%s 0:00:00 EST", day)))
+  to = as.numeric(as.POSIXct(sprintf("2018-05-%s 23:59:59 EST", day)))
+  http = sprintf("https://api.um.warszawa.pl/api/action/19115store_getNotificationsForDate/?id=28dc65ad-fff5-447b-99a3-95b71b4a7d1e&dateFrom=%s000&dateTo=%s000&apikey=%s"
+                 , from, to, apikey)
+  strona = readLines(http)
+  print(http)
+  df = fromJSON(strona)
+  df=df$result
+  df= df$result
+  df= df$notifications
+  df_finish<-rbind.fill(df_finish, df)
+  print(paste0(i, "obserwacje: ", length(df)))
+  
+  Sys.sleep(5)
+ 
+}
+
+ df_lipiec_male<-df_finish
+ df_czerwiec_male<-df_finish
+
+write.csv(df_lipiec_male%>%select(-statuses), "lipiec_male.csv")
+write.csv(df_czerwiec_male%>%select(-statuses), "czerwiec_male.csv")
+ 
+
+
+
+
+
+
+apikey = "840fa06b-a4ea-40ff-9d83-9d68dab180a9"
+
+df_finish <- data.frame()
+dates <- seq(as.Date('2018-03-01'), as.Date('2018-08-31'), by = 'days')
+for (i in 1:(length(dates) - 1)) {
+  from = as.numeric(as.POSIXct(dates[i]))
+  to = as.numeric(as.POSIXct(dates[i + 1]))
+  http = sprintf(
+    "https://api.um.warszawa.pl/api/action/19115store_getNotificationsForDate/?id=28dc65ad-fff5-447b-99a3-95b71b4a7d1e&dateFrom=%s000&dateTo=%s000&apikey=%s",
+    from,
+    to,
+    apikey
+  )
+  strona = readLines(http)
+  print(http)
+  df <- fromJSON(strona)
+  df <- df[['result']][['result']][['notifications']]
+  df_finish <- rbind.fill(df_finish, df)
+  print(paste0(i, " dzień, obserwacje: ", nrow(df)))
+  
+  Sys.sleep(2)
+  
+}

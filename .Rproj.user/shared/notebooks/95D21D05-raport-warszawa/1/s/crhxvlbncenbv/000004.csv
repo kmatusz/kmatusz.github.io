@@ -1,0 +1,8 @@
+"0","#podkategoria"
+"0","plot_subkat<-ggplot(df$subcategory%>%table()%>%as.data.frame(), "
+"0","       aes(x=reorder(., Freq), y=Freq, fill=reorder(., Freq)))+"
+"0","  geom_bar(stat = 'identity')+coord_flip()+"
+"0","  guides(fill=F)+"
+"0","  theme_minimal()+"
+"0","  labs(x='Ilość zgłoszeń', y='Typ zgłoszenia', title='Liczebności w podkategoriach')"
+"0","plot_subkat"

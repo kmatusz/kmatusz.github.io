@@ -1,0 +1,232 @@
+---
+title: "Analiza zgłoszeń na numer 19115 w Warszawie"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+### Wstęp
+Miasto Warszawa udostępnia niektóre dane publiczne korzystając z wygodnego interfejsu. Jedną z dostępnych baz jest baza zgłoszeń do systemu powiadomień 19115. Jest to numer pod którym można zgłaszać sprawy wymagające interwencji służb miejskich a także sugerować usprawnienia w funkcjonowaniu miasta. 
+Wszystkie zgłoszenia są dostępne przez wygodne API dostępne na stronie [api.um.warszawa.pl](api.um.warszawa.pl). Pierwsym krokiem będzie pobranie danych, a następnie analiza eksploracyjna.
+
+### Pobranie danych
+Pierwszym krokiem będzie zalogowanie i wygenerowanie swojego APIkey na strone API. Dane są dostępne w formacie JSON. Aby się do nich dostać wystarczy pobrać treść odpowiedniej strony (adres strony odpowiedni do zapytania jakie chcemy stworzyć jest dostępny w dokumentacji API). Do mojego projektu użyłem zapytania, które pobiera wszystkie zgłoszenia w danym okresie. Pobrałem dane od kwietnia 2018 do końca sierpnia. Pewnym utrudnieniem jest fakt że możliwe jest pobranie naraz tylko 100 zgłoszeń. Dlatego zdecydowałem się na pobieranie danych paczkami, po jednym zapytaniu na 1 dzień. Oto kod użyty do generowania bazy:
+
+
+```
+apikey = "XXXXXXXXXXXX"
+
+df_finish <- data.frame()
+dates <- seq(as.Date('2018-03-01'), as.Date('2018-08-31'), by = 'days')
+for (i in 1:(length(dates) - 1)) {
+  from = as.numeric(as.POSIXct(dates[i]))
+  to = as.numeric(as.POSIXct(dates[i + 1]))
+  http = sprintf(
+    "https://api.um.warszawa.pl/api/action/19115store_getNotificationsForDate/?id=28dc65ad-fff5-447b-99a3-95b71b4a7d1e&dateFrom=%s000&dateTo=%s000&apikey=%s",
+    from,
+    to,
+    apikey
+  )
+  strona = readLines(http)
+  print(http)
+  df <- fromJSON(strona)
+  df <- df[['result']][['result']][['notifications']]
+  df_finish <- rbind.fill(df_finish, df)
+  print(paste0(i, " dzień, obserwacje: ", nrow(df)))
+  
+  Sys.sleep(2)
+  
+}
+```
+
+Żeby nie powtarzać tego procesu za każdym razem zapisałem dane do pliku csv. Pobrane dane są dostępne na moim githubie na stronie projektu (LINK).
+```{r}
+library(leaflet)
+library(knitr)
+library(rvest)
+library(plyr)
+library(tidyverse)
+library(jsonlite)
+library(lubridate)
+library(readr)
+df<-read_csv('data.csv')
+```
+#### Poprawienie kooordynat
+Zacznijmy obróbkę danych. Zwróciły moją uwagę 2 standardy prezentacji współrzędnych georaficznych: WGS84 (powszechnie znany format, podajemy długość i szerokość w stopniach), a także format bazy danych oracle. Pierwszy format jest wygodniejszy w obróbce, dlatego na pierwszy rzut oka chciałem usunąć koordynaty w formacie Oracle. Niestety po sprawdzeniu okazało się, że tylko około 1/3 punktów ma poprawne współrzędne odpowiadające Warszawie. Poza tym były 2 klastry punktów, oba gdzieś na oceanie. Z formatem Oracle wszystko wyglądało w porządku. Niestety nigdzie nie udało mi się znaleźć dokumentacji, jak przeliczyć jeden format na drugi. Trochę "naokoło", postanowiłem dopasować model liniowy pomiędzy koordynatami Oracle i WGS. Okazało się że wyniki są zadowalające, i w końcu wpółrzędne odpowiadają rozmieszczeniem Warszawie.
+```{r}
+x_coord_lm<-lm(xCoordWGS84~xCoordOracle, df%>%filter(xCoordWGS84>10))
+y_coord_lm<-lm(yCoordWGS84~yCoordOracle, df%>%filter(xCoordWGS84>10))
+
+df<-df%>%mutate(xCoord=ifelse(xCoordOracle!=0, xCoordOracle*x_coord_lm$coefficients[2]+x_coord_lm$coefficients[1], NA), yCoord=ifelse(xCoordOracle!=0,yCoordOracle*y_coord_lm$coefficients[2]+y_coord_lm$coefficients[1], NA))
+```
+Innymi operacjami na surowym zbiorze były usunięcie kolumn city (zawsze Warszawa) i apartmentNumber (100% brakujących wartości). Nie do końca rozumiem czemu te kolumny w ogóle znalazły się w odpowiedzi API ;-) . 
+Poza tym zmieniłem format daty utworzenia zdarzenia z POSIXct.
+```{r}
+df<-df%>%select(-aparmentNumber, -city, -xCoordWGS84, -yCoordWGS84, -xCoordOracle, -yCoordOracle)
+  
+df<-df%>%mutate(createDate = createDate%>%
+                  as.character()%>%
+                  stringr::str_sub(end=-4)%>%
+                  as.numeric()%>%
+                  as.POSIXct(origin='1970-01-01 0:00:00')%>%
+                  as.Date())
+```
+
+### Analiza
+
+#### Mapka
+W trakcie tych kilku miesięcy mieszkańcy Warszawy wykorzystali numer ponad 5500 razy. Nie jest to imponująca liczba biorąc pod uwagę liczbę wszystkich mieszkańców. Załączyłem mapkę poglądową pozwalającą na podejrzenie wszystkich zgłoszeń.
+```{r}
+create_label<-function(df){
+  sprintf('<p>Data: %s <br> Podkategoria: %s <br>  Zdarzenie: %s</p>', 
+          df$createDate, df$subcategory, df$event)%>%
+    return()
+}
+leaflet(df%>%mutate(.,label=create_label(.)))%>%
+  addTiles()%>%
+  addCircleMarkers(~xCoord, ~yCoord, stroke=F, 
+                   fillOpacity = 0.7, radius=3,
+                   label = ~lapply(label,htmltools::HTML) )
+
+
+```
+
+Teraz sprawdźmy kilka podstawowych faktów dotyczących zebranych danych. Zaczniemy od analizy najczęstszych kategorii i podkategorii zgłoszeń.
+
+```{r}
+#kategoria
+plot_kat<-ggplot(df, aes(x=category))+
+  geom_bar(aes(fill=category))+
+  coord_flip()+
+  theme_minimal()+
+  guides(fill=F)+
+  labs(x='Ilość zgłoszeń', y='Typ zgłoszenia', title='Liczebności w kategoriach')
+#plot_kat
+```
+
+Najczęściej zgłaszana jest potrzeba interwencji, jednak liczba wolnych wniosków i uwag nie odstaje za bardzo. Sprawdźmy co odpowiada za tak wysoką liczbę wniosków:
+```{r}
+
+#podkategoria
+plot_subkat<-ggplot(df%>%filter(category=='Wolne wnioski i uwagi')%>%.$subcategory%>%table()%>%as.data.frame(), 
+       aes(x=reorder(., Freq), y=Freq, fill=reorder(., Freq)))+
+  geom_bar(stat = 'identity')+coord_flip()+
+  #scale_fill_brewer(palette = 'Set3')+
+  guides(fill=F)+
+  theme_minimal()+
+  labs(x='Ilość zgłoszeń', y='Typ zgłoszenia', title='Liczebności w podkategoriach dla uwag')
+gridExtra::grid.arrange(plot_kat, plot_subkat)
+
+```
+
+Jak widzimy, jest bardzo dużo zgłoszeń o konieczności posadzenia drzewa w danym miejscu. Jest to dosyć interesujące. 
+
+Sprawdźmy teraz jak rozkłada się liczba wniosków we wszystkich podkategoriach:
+```{r}
+
+
+#podkategoria
+plot_subkat<-ggplot(df$subcategory%>%table()%>%as.data.frame(), 
+       aes(x=reorder(., Freq), y=Freq, fill=reorder(., Freq)))+
+  geom_bar(stat = 'identity')+coord_flip()+
+  guides(fill=F)+
+  theme_minimal()+
+  labs(x='Ilość zgłoszeń', y='Typ zgłoszenia', title='Liczebności w podkategoriach')
+
+plot_subkat
+
+
+```
+
+```{r}
+ #data, liczba zgłoszeń i
+df$subcategory%>%
+  table()%>%
+  as.data.frame()%>%
+  arrange(desc(Freq))%>%
+  head(4)->most_freq
+names(most_freq)[1]='nazwa'
+most_freq$nazwa%>%as.character()->most_freq
+
+
+df<-df%>%
+  mutate(subcategory_bin=
+           ifelse(subcategory %in% most_freq, subcategory, 'inne_bin'))
+
+```
+
+
+```{r}
+#dzielnica
+ggplot(df$district%>%table()%>%as.data.frame(), 
+       aes(x=reorder(., Freq), y=Freq, fill=reorder(., Freq)))+
+  geom_bar(stat = 'identity')+
+  coord_flip()+
+  labs(x='Ilość zgłoszeń', y='Dzielnica', title='Ilość zgłoszeń w zależności od dzielnicy')+
+  guides(fill=FALSE)
+
+```
+
+Prawie za połowę zgłoszeń odpowiadają mieszkańcy Mokotowa. Aby pogłębić analizę możnaby dołączyć dane o zaludnieniu w każdej dzielnicy. Mokotów jest największą dzielnicą pod względem zaludnienia, ale różnica nie jest aż tak zauważalna. Co ciekawe Praga-Południe, druga najbardziej zaludniona dzielnica nie generuje nawet połowy powiadomień co Mokotów. 
+
+Sprawdźmy co odpowiada za tak dużą liczbę zgłoszeń na Mokotowie. Podsumowanie według podkategorii:
+```{r}
+ggplot(df%>%filter(district=='Mokotów')%>%
+    group_by(subcategory_bin)%>%
+    summarise(Freq=n()), 
+  aes(x=reorder(subcategory_bin, Freq), y=Freq, fill=reorder(subcategory_bin, Freq)))+
+  geom_bar(stat = 'identity')+coord_flip()+
+  labs(x='Typ zgłoszenia', y='Ilość zgłoszeń')+
+  theme_minimal()
+
+```
+
+Wygląda na to że na Mokotowie mieszkańcy mają problem z wywozem śmieci przez miasto. Sprawdźmy jak wygląda zależność liczby zgłoszeń od czasu (nadal na Mokotowie):
+```{r}
+
+ggplot(df%>%filter(district=='Mokotów' & subcategory=='Śmieci')%>%
+         mutate(week=week(createDate))%>%
+         group_by(week)%>%summarise(a=n()),
+       aes(x=week, y=a))+
+  geom_line(size=1.2)+
+  labs(x='Tydzień', y='Liczba zgłoszeń', title='Licza zgłoszeń dotyczących śmieci na Mokotowie')+
+  theme_minimal()
+```
+
+Widzimy bardzo duży wzrost zgłoszeń pod koniec badanego okresu czyli w okolicach sierpnia 2018. Po szybkim wyszukaniu okazało się, że w tym czasie zmieniła się firma odpowiedzialna za wywóz śmieci w tym regionie i były bardzo duże opóźnienia w odbieraniu śmieci. (Cała sprawa opisana jest [tutaj](https://tvnwarszawa.tvn24.pl/informacje,news,mokotow-tonie-w-smieciach-br-nie-sa-wywozone-od-konca-lipca,268132.html))
+
+
+#### Interwencje
+Najczęściej zgłaszany temat interwencji albo uwagi są w poniższej tabeli. Trzeba zwrócić uwagę że jest ponad (X) typów zgłaszanych tematów.
+```{r}
+
+#Event
+df$event%>%
+  table()%>%
+  as.data.frame()%>%
+  arrange(desc(Freq))%>%
+  head()%>%
+  kable()
+```
+
+
+Przejdźmy teraz do analizy ilości wniosków w czasie. Aby usunąć szumy w danych od dnia do dnia, jeden punkt na wykresie odpowiada jednemu tygodniowi.
+```{r}
+
+df%>%group_by(week(createDate))%>%
+  summarise(liczba=n())->freq_tyg
+  
+names(freq_tyg)[1]<-'data'
+
+ggplot(freq_tyg, aes(x=data, y=liczba))+
+  geom_point()+
+  geom_smooth()
+
+```
+
+Aby ułatwić analizę dodałem linię trendu. Przez dłuższy czas trend rosnący nie jest bardzo dobrze zauważalny, jednak przez kilka ostatnich tygodni można zobaczyć bardzo duże wartości. Trzeba pamiętać że API nakładało limit 100 zwróconych obserwacji na zapytanie. Mimo że za jednym razem pobierałem dane tylko z jednego dnia, kilka razy limit 100 obserwacji został osiągnięty, co oznacza że ilość obserwacji czasami jest niedoszacowana.
+
+
+
