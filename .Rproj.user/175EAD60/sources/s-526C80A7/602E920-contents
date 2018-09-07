@@ -1,0 +1,30 @@
+as.numeric(as.POSIXct( seq(ymd('2018-05-01'),ymd('2018-05-03'), by = 'days')))
+
+day="01"
+as.numeric(as.POSIXct(sprintf("2018-05-%s 0:00:00 EST", day)))
+as.numeric(as.POSIXct(ymd_hms('2018-05-01 0:00:00 EST')))
+
+dates<-as.numeric(as.POSIXct( seq(ymd('2018-03-01'),ymd('2018-08-31'), by = 'days')))
+apikey = "840fa06b-a4ea-40ff-9d83-9d68dab180a9"
+df_finish<- data.frame()
+i=1
+for (i in 167:(length(dates)-1)){
+  from = dates[i]
+  to = dates[i+1]
+  http = sprintf("https://api.um.warszawa.pl/api/action/19115store_getNotificationsForDate/?id=28dc65ad-fff5-447b-99a3-95b71b4a7d1e&dateFrom=%s000&dateTo=%s000&apikey=%s"
+                 , from, to, apikey)
+  strona = readLines(http)
+  
+  df = fromJSON(strona)
+  df=df[['result']][['result']][['notifications']]
+  if (length(df)!=0)  df_finish<-rbind.fill(df_finish, df)
+  print(paste0(i, " obserwacje: ", nrow(df)))
+  Sys.sleep(2)
+  
+}
+
+df_finish
+save(df_finish, file="C:/rwiz/warszawa19115/full.RData")
+save
+
+

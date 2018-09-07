@@ -1,0 +1,60 @@
+"0","setwd(""C:/rwiz/warszawa19115/"")"
+"0","library(leaflet)"
+"0","library(knitr)"
+"0","library(rvest)"
+"0","library(plyr)"
+"2","-----------------------------------------------------------------
+"
+"2","You have loaded plyr after dplyr - this is likely to cause problems.
+If you need functions from both plyr and dplyr, please load plyr first, then dplyr:
+library(plyr); library(dplyr)
+"
+"2","-----------------------------------------------------------------
+"
+"2","
+Do³¹czanie pakietu: ‘plyr’
+
+"
+"2","Nastêpuj¹cy obiekt zosta³ zakryty z ‘package:lubridate’:
+
+    here
+
+"
+"2","Nastêpuj¹ce obiekty zosta³y zakryte z ‘package:dplyr’:
+
+    arrange, count, desc, failwith, id, mutate, rename,
+    summarise, summarize
+
+"
+"2","Nastêpuj¹cy obiekt zosta³ zakryty z ‘package:purrr’:
+
+    compact
+
+"
+"0","library(tidyverse)"
+"0","library(jsonlite)"
+"0","library(lubridate)"
+"0","library(readr)"
+"0","df<-read_csv('data.csv')"
+"2","Parsed with column specification:
+cols(
+  category = col_character(),
+  city = col_character(),
+  subcategory = col_character(),
+  district = col_character(),
+  aparmentNumber = col_character(),
+  street2 = col_character(),
+  notificationType = col_character(),
+  createDate = col_double(),
+  siebelEventId = col_character(),
+  source = col_character(),
+  yCoordOracle = col_double(),
+  street = col_character(),
+  deviceType = col_character(),
+  xCoordOracle = col_double(),
+  notificationNumber = col_character(),
+  yCoordWGS84 = col_double(),
+  event = col_character(),
+  xCoordWGS84 = col_double()
+)
+"

@@ -1,0 +1,5 @@
+"0","#dzielnica"
+"0","ggplot(df$district%>%table()%>%as.data.frame(), "
+"0","       aes(x=reorder(., Freq), y=Freq))+"
+"0","  geom_bar(stat = 'identity')+coord_flip()+"
+"0","  labs(x='Ilość zgłoszeń', y='Dzielnica')"

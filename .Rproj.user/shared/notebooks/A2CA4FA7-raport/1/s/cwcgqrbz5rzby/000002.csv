@@ -1,0 +1,4 @@
+"0","x_coord_lm<-lm(xCoordWGS84~xCoordOracle, df%>%filter(xCoordWGS84>10))"
+"0","y_coord_lm<-lm(yCoordWGS84~yCoordOracle, df%>%filter(xCoordWGS84>10))"
+"0","df<-df%>%mutate(xCoord=ifelse(xCoordOracle!=0, xCoordOracle*x_coord_lm$coefficients[2]+x_coord_lm$coefficients[1], NA),"
+"0","            yCoord=ifelse(xCoordOracle!=0,yCoordOracle*y_coord_lm$coefficients[2]+y_coord_lm$coefficients[1], NA))"

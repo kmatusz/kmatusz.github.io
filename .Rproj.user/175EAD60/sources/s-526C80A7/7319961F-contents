@@ -1,0 +1,156 @@
+setwd("C:/rwiz/warszawa19115/")
+library(tidyverse)
+df<-df_finish
+df<-df%>%select(-statuses)
+write_csv(df, 'data.csv')
+
+df%>%select_if(is.character)
+#nany, wyrzucamy apartamentNumber
+df%>%summarise_all(function (x) mean(is.na(x)))%>%gather()
+df<-df%>%select(-aparmentNumber)
+df<-df%>%select(-city)
+table(df$subcategory)%>%as.data.frame()#%>%gather()
+
+names(df)
+
+#kategoria
+plot_kat<-ggplot(df, aes(x=category))+
+  geom_bar(aes(fill=category))+
+  coord_flip()+
+  theme_minimal()+
+  guides(fill=F)+
+  #scale_fill_brewer(palette = 'Set3')+
+  labs(x='Ilość zgłoszeń', y='Typ zgłoszenia', title='Liczebności w kategoriach')
+plot_kat
+#podkategoria
+plot_subkat<-ggplot(df$subcategory%>%table()%>%as.data.frame(), 
+       aes(x=reorder(., Freq), y=Freq, fill=reorder(., Freq)))+
+  geom_bar(stat = 'identity')+coord_flip()+
+  #scale_fill_brewer(palette = 'Set3')+
+  guides(fill=F)+
+  theme_minimal()+
+  labs(x='Ilość zgłoszeń', y='Typ zgłoszenia', title='Liczebności w podkategoriach')
+
+gridExtra::grid.arrange(plot_kat, plot_subkat)
+
+#dzielnica
+ggplot(df$district%>%table()%>%as.data.frame(), 
+       aes(x=reorder(., Freq), y=Freq))+
+  geom_bar(stat = 'identity')+coord_flip()+
+  labs(x='Ilość zgłoszeń', y='Dzielnica')
+
+#Event
+df$event%>%table()%>%as.data.frame()%>%arrange(desc(Freq))%>%head()
+
+
+#data
+df<-df%>%mutate(createDate = createDate%>%as.character()%>%stringr::str_sub(end=-4)%>%
+  as.numeric()%>%
+  as.POSIXct(origin='1970-01-01 0:00:00'))
+library(lubridate)
+
+df%>%group_by(week(as.Date(createDate)))%>%dplyr::summarise(liczba=n())->freq_tyg
+  
+names(freq_tyg)[1]<-'data'
+ymd(as.Date(df$createDate))
+
+detach("package:plyr", unload=TRUE) 
+
+freq_dni
+ggplot(freq_tyg, aes(x=data, y=liczba))+geom_point()+
+  geom_smooth()
+
+ #data, liczba zgłoszeń i
+df$subcategory%>%table()%>%as.data.frame()%>%arrange(desc(Freq))%>%
+  head(4)->most_freq
+names(most_freq)[1]='nazwa'
+most_freq$nazwa%>%as.character()->most_freq
+most_freq
+
+df<-df%>%
+  mutate(subcategory_bin=
+           ifelse(subcategory %in% most_freq, subcategory, 'inne_bin'))
+
+
+df%>%
+  mutate(week=week(createDate))%>%
+  select(week, subcategory_bin)%>%
+  group_by(week, subcategory_bin)%>%
+  dplyr::summarise(freq = n())->do_area_chart
+
+ggplot(do_area_chart, aes(x=week, y=freq, fill=subcategory_bin))+
+  geom_area()
+
+do_area_chart%>%group_by(week)%>%mutate(perc=freq/sum(freq))->do_area_relative
+
+ggplot(do_area_relative, aes(x=week, y=perc, fill=subcategory_bin))+
+  geom_area()
+
+
+
+
+
+
+
+ggplot(df%>%filter(category=='Wolne wnioski i uwagi')%>%.$subcategory%>%table()%>%as.data.frame(), 
+       aes(x=reorder(., Freq), y=Freq, fill=reorder(., Freq)))+
+  geom_bar(stat = 'identity')+coord_flip()+
+  #scale_fill_brewer(palette = 'Set3')+
+  guides(fill=F)+
+  theme_minimal()+
+  labs(x='Ilość zgłoszeń', y='Typ zgłoszenia', title='Liczebności w podkategoriach')
+
+
+ggplot(df$district%>%table()%>%as.data.frame(), 
+       aes(x=reorder(., Freq), y=Freq))+
+  geom_bar(stat = 'identity')+coord_flip()+
+  labs(x='Ilość zgłoszeń', y='Dzielnica')
+
+df%>%filter(district=='Mokotów')%>%
+  group_by(subcategory_bin)%>%
+  summarise(Freq=n())
+
+ggplot(df%>%filter(district=='Mokotów')%>%
+    group_by(subcategory_bin)%>%
+    summarise(Freq=n()), 
+  aes(x=reorder(subcategory_bin, Freq), y=Freq))+
+  geom_bar(stat = 'identity')+coord_flip()+
+  labs(x='Typ zgłoszenia', y='Ilość zgłoszeń')+theme_minimal()
+
+
+ggplot(df%>%filter(district=='Mokotów' & subcategory=='Śmieci')%>%
+         mutate(week=week(createDate))%>%
+         group_by(week)%>%summarise(a=n()),
+       aes(x=week, y=a))+geom_line()
+
+
+
+ggplot(df$district%>%table()%>%as.data.frame(), 
+       aes(x=reorder(., Freq), y=Freq))+
+  geom_bar(stat = 'identity')+coord_flip()+
+  labs(x='Ilość zgłoszeń', y='Dzielnica')
+
+
+
+create_label<-function(df){
+  sprintf('<p>Data: %s <br> Podkategoria: %s <br>  Zdarzenie: %s</p>', 
+          df$createDate, df$subcategory, df$event)%>%
+    return()
+}
+leaflet(df%>%mutate(.,label=create_label(.)))%>%
+  addTiles()%>%
+  addCircleMarkers(~xCoord, ~yCoord, stroke=F, 
+                   fillOpacity = 0.7, radius=3,
+                   label = ~lapply(label,htmltools::HTML) )
+
+
+
+
+df$subcategory_bin%>%table()
+df%>%group_by(district, subcategory_bin)%>%summarise(liczba=n())->subkat_dist
+
+subkat_dist%>%spread(district, liczba, 2)->subkat_dist_matrix
+subkat_dist_matrix%>%View()
+
+
+

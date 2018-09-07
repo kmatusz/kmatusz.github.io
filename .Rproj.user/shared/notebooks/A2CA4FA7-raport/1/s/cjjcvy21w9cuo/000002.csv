@@ -1,0 +1,5 @@
+"0","df<-df%>%select(-aparmentNumber, -city, -xCoordWGS84, -yCoordWGS84, -xCoordOracle, -yCoordOracle)"
+"0","  "
+"0","df<-df%>%mutate(createDate = createDate%>%as.character()%>%stringr::str_sub(end=-4)%>%"
+"0","  as.numeric()%>%"
+"0","  as.POSIXct(origin='1970-01-01 0:00:00')%>%as.Date())"
