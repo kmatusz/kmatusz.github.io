@@ -2,9 +2,4 @@ name: "Kamil Matuszelański"
 output_dir: "."
 navbar:
   title: "Kamil Matuszelański"
-  left:
-  - text: "About me"
-    href: index.html
-  - text: "Projects"
-    href: toc.html
 output: html_document
