@@ -1,5 +1,6 @@
 Here you can find my posts and projects.
 
+* [Licencjat](licencjat.html) 
 * [Analiza zgłoszeń na numer interwencyjny w Warszawie](raport-wwa.html)
 * [CIFAR-10 challenge (Python)](cifar-analysis.html)
 * [Template for machine learning modelling (R)](template_modelling.html)
