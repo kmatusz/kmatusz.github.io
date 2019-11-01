@@ -1,12 +1,13 @@
 ---
 ---
-Cześć, nazywam się Kamil Matuszelański, jestem studentem ekonomii zainteresowanym tematyką data science. Poniżej znajdziesz projekty które wykonałem.
+Hi, I am Kamil Matuszelański. I am currently enrolled in Master's Data Science Studies. Here you can find the list of my finished projects:
 
-* [Bachelor's thesis - study on spatial data using Explainable AI](licencjat.html) 
-* [Analiza zgłoszeń na numer interwencyjny w Warszawie](raport-wwa.html)
-* [Template for machine learning modelling (R)](template_modelling.html)
-* [CIFAR-10 challenge (Python)](cifar-analysis.html)
-* [Modelowanie sieci epidemicznej (Shiny R)](https://kmsieci.shinyapps.io/siec/)
-* [Hackathon- analiza głosowań Sejmu (Python)](https://github.com/Kamyki/Hackaton-fuw)
+* [Bachelor's thesis - study on spatial data using Explainable AI](licencjat.html)
+* [Econometric model for restaurants reviews estimation (in polish)](model_restauracje.pdf)
+* [Analysis of *19115* intervention number in Warsaw (in polish)](raport-wwa.html)
+* [Template for machine learning modelling](template_modelling.html)
+* [CIFAR-10 challenge](cifar-analysis.html)
+* [Epidemic network modeling - simulation app (in polish)](https://kmsieci.shinyapps.io/siec/)
+* [Analysis of Sejm Votings-hackathon (in polish)](https://github.com/Kamyki/Hackaton-fuw)
 
-Moje CV możesz obejrzeć [tutaj](CV.pdf).
+You can find my CV [here](CV.pdf).
