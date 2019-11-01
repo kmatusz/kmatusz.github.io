@@ -1,5 +1,5 @@
 ---
-title: "licencjat"
+title: ""
 output: html_document
 ---
 
@@ -7,22 +7,28 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+## Business and its neighbourhood – factors driving restaurants locationsin Warsaw
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+This is a summary of my Bachelors Thesis paper at Faculty of Economics - University of Warsaw. Main goal was to assess, wchich factors are crucial in locations of restaurants in particular region of Warsaw. The whole paper can be found under [this link](licencjat.pdf). The paper is currently under review in *Statistics in Transition* Journal. 
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+#### Quick Summary of the paper
 
-```{r cars}
-summary(cars)
-```
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+- Methods:
+  - Machine Learning - Random Forest and Logistic Regression models
+  - Explainable AI - Model Class Reliance for assesment of features relative importance, independent from the model tested
+  - Spatial issues - Spatial dependency tests, spatial data wranglng, usage of Spatial Weights in the modeling
+  - R caret package
+  - Web scraping
+  
+- Factors driving restaurants location:
+  - Presence of businesses in the area - most important factor
+  - Proximity of other restaurants - still important factor
+  - Population density in the area - not important
+  - Communication infrastructure (bus stops, roads) - not important
+  
+  
+  
+  
+  
+  
+  
