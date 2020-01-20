@@ -3,11 +3,14 @@
 Hi, I am Kamil Matuszelański. I am currently enrolled in Master's Data Science Studies. Here you can find the list of my finished projects:
 
 * [Bachelor's thesis - study on spatial data using Explainable AI](licencjat.html)
+* [Dimension reduction techniques in network analysis](USL/network_dimension.html)
+* [Demonstration of kmeans++, a robust alternative to k-means algorithm](USL/kmeanspp.html)
 * [CIFAR-10 challenge](cifar-analysis.html)
 * [Analysis of *19115* intervention number in Warsaw (in polish)](raport-wwa.html)
 * [Epidemic network modeling - simulation app (in polish)](https://kmsieci.shinyapps.io/siec/)
 * [Econometric model for restaurants reviews estimation (in polish)](model_restauracje.pdf)
 * [Template for machine learning modelling](template_modelling.html)
+* [Implementation of recommender system using association rules mining](USL/recommender.html)
 * [Analysis of Sejm Votings-hackathon (in polish)](https://github.com/Kamyki/Hackaton-fuw)
 
 You can find my CV [here](CV.pdf).
