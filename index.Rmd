@@ -4,6 +4,7 @@ Hi, I am Kamil Matuszelański. I am currently enrolled in Master's Data Science 
 
 * [Bachelor's thesis - study on spatial data using Explainable AI](licencjat.html)
 * [Dimension reduction techniques in network analysis](USL/network_dimension.html)
+* [Forecasting cryptocurrencies prices](Time_Series_BTC.html)
 * [Demonstration of kmeans++, a robust alternative to k-means algorithm](USL/kmeanspp.html)
 * [CIFAR-10 challenge](cifar-analysis.html)
 * [Analysis of *19115* intervention number in Warsaw (in polish)](raport-wwa.html)
