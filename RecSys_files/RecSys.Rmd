@@ -1,0 +1,93 @@
+---
+title: "Proposal for recommendation engine - RecSys 2021 challenge"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+bibliography: bib.bibtex
+author: Kamil Matuszelański
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+This is my proposal for a solution of the RecSys 2021 challenge - engagement prediction for Tweets ([link](https://recsys.acm.org/recsys21/challenge/)). I have prepared this document during *Recommender Systems* lecture conducted by Santiago Segui Mesquida, Ph.D., during my Erasmus exchange at Universitat de Barcelona, Spain.
+
+I will use DeepFM model with externally trained embeddings of user followers network, and also of twitter text. The rest of the embeddings for other features will be trained internaly in the model.
+
+## General remarks and insights
+
+- Because the dataset is very big, deep learning can be easily applied. 
+- The embeddings of the contents should be learned frequently as new trends come up basically every hour, retraining the embeddings even day after day should be considered.
+- The tweets are usually short-living, because of viral nature of the medium. That is why vanilla collaborative filtering approaches would most likely fail. However, the structure of tweets authors is probably more stable. That is, I assume that if user x liked tweets of some author in the past, she will be likely to like the tweets in the future too. Morover, if users similar to x liked tweets of particular author in the past, it is likely that user x will also like them.
+- In general, the social network of the users can be a valuable source of information. It is almost sure that if user x1 follows user x2, it is more likely for user x1 to like a tweet of user x2, than other user x3 that x1 doesn't follow. This concept can be moved further and tested. Imagine that users x1, x2, x3 all follow each other, and at the same time users x2 and x3 follow user x4. A hypothesis to check is if user x1 would be more likely to like the content of user x4 also. Information about social network can be embedded into a vector using network analysis tools and included in the model.
+
+## The model
+
+To combine the advantages of deep learning and Factorization Machine approaches, I will use DeepFM model [@guo2017deepfm]. 
+
+The model consists of 3 parts - embedding layers, FM layer and deep learning layer. In the original paper, the model is applied on a dataset with sparse features, which are obtained from using one-hot encoding on various categorical variables. The authors use embedding layers to directly create the embeddings from that dataset during main model trainig. Other possible approach, utilized in @cheng2016wide, is to first train embedding models on imput data, transform the dataset, and then use this input for the model. This approach has an advantage that it is possible to use more complex or external embeddings to the network. Also, it is possible to retrain the embeddings on newer data without retraining the whole network from scratch. Because of the fact that the Twitter dataset is multimodal, I have decided to combine these two approaches. For the categorical features that can be easily encoded using one-hot approach, I will include the embedding layers in the DeepFM model, similarly to the original paper. On the other hand, for the features that more advanced embedding will possibly be beneficial, I will pretrain the embeddings, transform the dataset and pass these features directly to FM and deep learing parts.
+
+## Various data modalities handling
+
+Below I have included of short description of how each feature of the dataset will be preprocessed and what embedding strategy will be used.
+
+### Most basic features
+
+These are the features for which embedding layer will be directly included in DeepFM model, or features that don't require using embedding.
+
+### Non-embedding features
+
+These features don't require using embedding layer as these are mostly numeric. They will be directly passed to the deep and FM parts, without embedding layer:
+
+- **follower count, following count** - calculate quantiles and this way map the values to range [0,1]. 
+- **is_verified** - straight to the model
+- **account creation timestamp** - calculate quantiles and map to range [0,1]
+
+### Features to apply embedding on
+
+Features that will be one-hot-encoded and passed to embedding layer, which is meant to represent the metadata and context of the tweet:
+
+- **Language of the tweet** - I will use one-hot-encoding for each language. Also, I will add one additional dummy variable indicating if the particular user has previously engaged into contents with that language.
+- **presentMedia** - calculate dummy encodings for each type of media - just 3 values
+- **tweetType** - 4 possible values - use dummy encodings
+- **hashtags** - one-hot embedding
+- **tweet timestamp and hypothetical user engagement timestamp**
+  1. calculate the difference between the time the user makes a possible action and the tweet timestamp. Then calculate quantiles and map to range [0,1]. This way the model will obtain information whether the tweet is old.
+  2. For both fields, separate the day of the week, hour into dummies. Usage of months is impossible, as the dataset is too short. Using these dummies the model will be able to learn context in which the tweet was created and also reacted to. 
+
+### Usage of the followers network
+
+From the field **engageeFollowsEngager** the network of followers can be recreated - where users are vertices and there is an edge if the users follow each other. There are multiple ways to obtain network embeddings, that reflect the implicit structure. Actually, even basic network drawing algorithms like Fruchterman-Reingold [@fruchterman1991graph] or Kamada-Kawai [@kamada1989algorithm] implemented in graphics libraries can serve that goal. However, more appropriate approach is to use a network embedding similar to word2vec - that is network2vec [@zhenhua2019network2vec]. Sometimes in the case of graph analysis computational feasibility can be a problem, however with careful optimizations it is still bearable. @zhenhua2019network2vec showed that their algorithm can be easily used on couple-million-vertices dataset. And while in 2021 challenge there are 1 billion data points, the number of the users will be for sure way smaller.
+
+Hypothesis to test is if the data about followers and followees are dynamic. That is, suppose we have 2 observations about user x1 engaging with the contents of user x2, separated by 1 week. It would be valuable to check if sometimes there are cases where in the first observation engageeFollowsEngager is set to 1 and then to 0, or vice versa. If this is the case, a feature "when engagee started following engager" could be inferred with some accuracy. My hypothesis is that when the user recently started following someone, it is more likely that she is interested in the content shared, and is more likely to engage. On the contrary, following relationships that are older can possibly mean that the follower was interested in the contents some time ago, then interest was lost but still didn't unfollow.
+
+### Usage of tweet text
+
+The challenge is to change the tweet text into a embedding. An example model that could serve this task is doc2vec [@le2014distributed]. This model allows for training separate topics and including them in the same embedding space. This feature can be adopted to handling various languages present in the dataset.
+
+## Train/validation split
+
+In the dataset provided by twitter the hardest part of sampling the users properly is already taken care of - that is, the structure of the dataset should resemble the real-world one. Because of this, and the fact that test dataset is also created in temporal manner, I have decided to split the dataset by time - first 2 weeks will be used for model training, and 3rd week - for validation. Regarding the metric used for candidate models comparison - I will use ROC-AUC, the same as the one proposed by the competition hosts.
+
+Because of probable data imbalance, to training the final model some strategy to fight this issue should be applied. One possible approach is negative random downsampling of the observations for which the user didn't react in any way. Other is sample weighting with weights proportional to the imbalances. However, whether these strategies would give improvement should be tested on validation set. 
+
+## Model retraining
+
+Because of the dynamic nature of twitter data, concept drift can quickly make the model unusable. That is why retraining the models is crucial. @shiebler2018fighting showed that it is not necessary to retrain the whole model, as this is a time-consuming phase. Rather, just embeddings can be retrained. 
+
+There are two scenarios of model retraining that I would like to validate using validation set performance:
+
+- Train model on the whole train set, predict on the whole validation set
+- Train model on the whole train set, predict on the first day of the validation set. Retrain embeddings including data from first day of validation set, predict on the second day of the validation set. Repeat for all days in validation.
+
+
+## References
+
+
+
+
+
