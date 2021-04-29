@@ -11,8 +11,9 @@
 
 
 
-<title>index.utf8</title>
+<title>Kamil Matuszelański</title>
 
+<script src="site_libs/header-attrs-2.5/header-attrs.js"></script>
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
@@ -22,6 +23,17 @@
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/anchor-sections-1.0/anchor-sections.css" rel="stylesheet" />
+<script src="site_libs/anchor-sections-1.0/anchor-sections.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
@@ -284,6 +296,7 @@ $(document).ready(function () {
 
 
 
+<h1 class="title toc-ignore">Kamil Matuszelański</h1>
 
 </div>
 
@@ -293,6 +306,7 @@ $(document).ready(function () {
 <li><a href="licencjat.html">Bachelor’s thesis - study on spatial data using Explainable AI</a></li>
 <li><a href="USL/network_dimension.html">Dimension reduction techniques in network analysis</a></li>
 <li><a href="Time_Series_BTC.html">Forecasting cryptocurrencies prices</a></li>
+<li><a href="RecSys.html">Proposal for a twitter recommendation engine - RecSys 2021 challenge</a></li>
 <li><a href="filmweb_scraping.html">Scraping filmweb.com page using scrapy and selenium frameworks</a></li>
 <li><a href="USL/kmeanspp.html">Demonstration of kmeans++, a robust alternative to k-means algorithm</a></li>
 <li><a href="cifar-analysis.html">CIFAR-10 challenge</a></li>
@@ -314,7 +328,7 @@ $(document).ready(function () {
 
 // add bootstrap table styles to pandoc tables
 function bootstrapStylePandocTables() {
-  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
 }
 $(document).ready(function () {
   bootstrapStylePandocTables();
