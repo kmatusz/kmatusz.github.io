@@ -11,7 +11,7 @@
 
 
 
-<title>licencjat.utf8</title>
+<title>age.utf8</title>
 
 <script src="site_libs/header-attrs-2.5/header-attrs.js"></script>
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
@@ -300,30 +300,15 @@ $(document).ready(function () {
 </div>
 
 
-<div id="business-and-its-neighbourhood-factors-driving-restaurants-locations-in-warsaw" class="section level2">
-<h2>Business and its neighbourhood – factors driving restaurants locations in Warsaw</h2>
-<p><strong>The whole paper can be found under <a href="licencjat.pdf">this link</a>.</strong></p>
-<p>This is a summary of my Bachelors Thesis paper at Faculty of Economics - University of Warsaw. Main goal was to assess, which factors are crucial in locations of restaurants in particular region of Warsaw. The paper is currently under review in <em>Statistics in Transition</em> Journal.</p>
-<div id="summary-of-the-paper" class="section level4">
-<h4>Summary of the paper:</h4>
+<div id="unbiased-apparent-age-recognition-from-the-photos-using-deep-learning" class="section level2">
+<h2>Unbiased Apparent Age Recognition from the photos using deep learning</h2>
+<p>This task was meant at predicting age of a person based on their image, using deep learning methods. The most challenging part was that the results should not be biased against particular race, gender, age and face expression.</p>
+<p>Unfortunately, the data and the notebooks that I have created are confidential. Below I have included a short description of the strategies that I have used to compete the bias in the predictions:</p>
 <ul>
-<li>Methods:
-<ul>
-<li>Machine Learning - Random Forest and Logistic Regression models</li>
-<li>Explainable AI - Model Class Reliance for assesment of features relative importance, independent from the model tested</li>
-<li>Spatial issues - Spatial dependency tests, spatial data wranglng, usage of Spatial Weights in the modeling</li>
-<li>R caret package</li>
-<li>Web scraping</li>
-</ul></li>
-<li>Factors driving restaurants location:
-<ul>
-<li>Presence of businesses in the area - most important factor</li>
-<li>Proximity of other restaurants - still important factor</li>
-<li>Population density in the area - not important</li>
-<li>Communication infrastructure (bus stops, roads) - not important</li>
-</ul></li>
+<li>Some of the categories were underrepresented in the dataset. Also, the dataset was pretty small and prone to overfitting. That is why I have used a enhanced data augmentation approach. Namely, first I have used some non-standard image transformations, like occlusion or changing the values of the colors channels. Second, I have oversampled minority groups from the dataset. Keras ImageDataGenerator class is not sufficient for this task, as it is able to generate only one distorted image per one original image in one epoch. That is why I wrote my own implementation of data generator.</li>
+<li>I have addressed the bias in the predictions using adaptive weights approach. That is, after each of the model training epochs, I have tested the bias in each of the categories. Then, for the categories with the worst performance, in the next epoch I have increased their weight in the loss function, based on relative drop in performance compared to the best categories.</li>
+<li>I have tested different dropout strategies and regularizers, however they didn’t bring any improvement to the model.</li>
 </ul>
-</div>
 </div>
 
 

@@ -1,0 +1,26 @@
+---
+title: ""
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Modeling customer churn in e-commerce retail business
+
+
+This is a summary of my Master's Thesis paper on the Data Science degree on the Faculty of Economics - University of Warsaw, Poland. The goal of this study was to propose a model for predicting customer loyalty in an e-commerce retail business, as well as infer the factors driving customer loyalty.
+The whole paper can be found under [this link](mgr/mgr.pdf).
+
+The dataset used was obtained from Olist e-commerce retail company operating in Brazil. A wide range of variables was used in the modelling process, including transaction data, customer location, and customer perception about the previous purchase. This dataset was enhanced by adding the data from the national census. A distinctive characteristic of this company is that a very low percentage of customers decides to make a second purchase (3,3%), which made the modelling harder.
+
+Various preprocessing and feature generation methods were applied to the dataset. Regarding feature generation, mining the texts of the reviews proved to be the most challenging. Latent Dirichlet Allocation, a go-to model for topic modelling, didn’t give meaningful results. A complex, neural-network based Aspect Extraction method had to be used, for which only one draft implementation was available. In the end, although inferring the topic was successful, this feature was not important for model’s predictions. The only advantage of extracting review topic can be enhancing the company’s data warehouse by this new information, and using it for other CRM analyses than churn prediction.
+
+Regarding the Machine Learning modelling used in this study, two models were tested, Logistic Regression and Extreme Gradient Boosting. XGBoost performed significantly better than Logistic Regression in loyalty prediction. This study also showed that it is possible to use the performance advantages of this more advanced method, and at the same time have an explainable model using Explainable Artificial Intelligence (XAI) methods. Specifically, two XAI algorithms were used, Permutation-based Feature Importance for assessing importance of the features, and Partial Dependence Profile for inferring the direction of features’ influence. The results reported show that transaction, location, and geodemographic data are the most relevant predictors. On the contrary, customer perception proxied by the numeric review and the topic of the text review were shown to be not important.
+
+Main conclusion from this study important for CRM efforts is that customer churn can be successfully modelled and bring revenue to the company. More specifically, the predictions obtained from the model can be used in the task of customer targeting, to target the customers that are the most possible to stay with the company. 
+
+Besides behavioural variables (that didn’t require much resources investment for preprocessing), the best variables were the ones coming from the census data. This can be a hint that spatial analyses should be more invested in by the company, for example by hiring skilled experts or buying access to external spatial data sources. Such data providers are specialized in providing a very detailed and granular demographic data. Their functioning is based on combining information from different sources and as a result they can provide demographic data even to the resolution of neighbourhood.
+
+There are some of the products categories that the customer bought in the first purchase that influence the propensity to churn negatively. It is possible that these categories are of lower quality, and the customers are simply unsatisfied with the purchase. This should be investigated further.

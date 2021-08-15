@@ -1,0 +1,18 @@
+---
+title: ""
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Unbiased Apparent Age Recognition from the photos using deep learning
+
+This task was meant at predicting age of a person based on their image, using deep learning methods. The most challenging part was that the results should not be biased against particular race, gender, age and face expression.
+
+Unfortunately, the data and the notebooks that I have created are confidential. Below I have included a short description of the strategies that I have used to compete the bias in the predictions:
+
+- Some of the categories were underrepresented in the dataset. Also, the dataset was pretty small and prone to overfitting. That is why I have used a enhanced data augmentation approach. Namely, first I have used some non-standard image transformations, like occlusion or changing the values of the colors channels. Second, I have oversampled minority groups from the dataset. Keras ImageDataGenerator class is not sufficient for this task, as it is able to generate only one distorted image per one original image in one epoch. That is why I wrote my own implementation of data generator.
+- I have addressed the bias in the predictions using adaptive weights approach. That is, after each of the model training epochs, I have tested the bias in each of the categories. Then, for the categories with the worst performance, in the next epoch I have increased their weight in the loss function, based on relative drop in performance compared to the best categories. 
+- I have tested different dropout strategies and regularizers, however they didn't bring any improvement to the model. 

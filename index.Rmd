@@ -3,18 +3,33 @@
 
 Hi, I am Kamil Matuszelański. I am currently enrolled in Master's Data Science Studies. Here you can find the list of my finished projects:
 
+Graduate theses:
+
+* [Master's thesis - modelling customer churn in retail e-commerce business](mgr.html)
 * [Bachelor's thesis - study on spatial data using Explainable AI](licencjat.html)
-* [Dimension reduction techniques in network analysis](USL/network_dimension.html)
+
+Machine learning projects:
+
+* [Blastocyst recognition using image segmentation](blastocyst/Blastocyst-recognition.html)
+* [Stereotypes or political correctness - NLP analysis of nearly 100 years of Polish Sejm sessions](report_sejm.html)
 * [Forecasting cryptocurrencies prices](Time_Series_BTC.html)
 * [Proposal for a twitter recommendation engine - RecSys 2021 challenge](RecSys.html)
-* [Scraping filmweb.com page using scrapy and selenium frameworks](filmweb_scraping.html)
-* [Demonstration of kmeans++, a robust alternative to k-means algorithm](USL/kmeanspp.html)
-* [CIFAR-10 challenge](cifar-analysis.html)
-* [Analysis of *19115* intervention number in Warsaw (in polish)](raport-wwa.html)
-* [Epidemic network modeling - simulation app (in polish)](https://kmsieci.shinyapps.io/siec/)
-* [Econometric model for restaurants reviews estimation (in polish)](model_restauracje.pdf)
-* [Template for machine learning modelling](template_modelling.html)
-* [Implementation of recommender system using association rules mining](USL/recommender.html)
-* [Analysis of Sejm Votings-hackathon (in polish)](https://github.com/Kamyki/Hackaton-fuw)
+* [Unbiased Apparent Age Recognition from the photos using deep learning](age.html)
 
-You can find my CV [here](CV.pdf).
+Other projects: 
+
+* [Visualisation of beneficiaries of EU funds in Poland (web app, due to free hosting takes a bit to run)](https://kmatusz111.shinyapps.io/eu_budget/)
+* [Dimension reduction techniques in network analysis](USL/network_dimension.html)
+* [Demonstration of kmeans++, a robust alternative to k-means algorithm](USL/kmeanspp.html)
+* [Implementation of recommender system using association rules mining](USL/recommender.html)
+
+
+<!-- * [Scraping filmweb.com page using scrapy and selenium frameworks](filmweb_scraping.html) -->
+<!-- * [CIFAR-10 challenge](cifar-analysis.html) -->
+<!-- * [Analysis of *19115* intervention number in Warsaw (in polish)](raport-wwa.html) -->
+<!-- * [Epidemic network modeling - simulation app (in polish)](https://kmsieci.shinyapps.io/siec/) -->
+<!-- * [Econometric model for restaurants reviews estimation (in polish)](model_restauracje.pdf) -->
+<!-- * [Template for machine learning modelling](template_modelling.html) -->
+<!-- * [Analysis of Sejm Votings-hackathon (in polish)](https://github.com/Kamyki/Hackaton-fuw) -->
+
+<!-- You can find my CV [here](CV.pdf). -->
