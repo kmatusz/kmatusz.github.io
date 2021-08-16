@@ -1,5 +1,3 @@
----
----
 
 Hi, I am Kamil Matuszelański. I am currently enrolled in Master's Data Science Studies. Here you can find the list of my finished projects:
 
@@ -8,17 +6,18 @@ Graduate theses:
 * [Master's thesis - modelling customer churn in retail e-commerce business](mgr.html)
 * [Bachelor's thesis - study on spatial data using Explainable AI](licencjat.html)
 
-Machine learning projects:
+Machine learning projects meant at prediction:
 
 * [Blastocyst recognition using image segmentation](blastocyst/Blastocyst-recognition.html)
-* [Stereotypes or political correctness - NLP analysis of nearly 100 years of Polish Sejm sessions](report_sejm.html)
-* [Forecasting cryptocurrencies prices](Time_Series_BTC.html)
-* [Proposal for a twitter recommendation engine - RecSys 2021 challenge](RecSys.html)
 * [Unbiased Apparent Age Recognition from the photos using deep learning](age.html)
+* [Proposal for a twitter recommendation engine - RecSys 2021 challenge](RecSys.html)
+* [Forecasting cryptocurrencies prices](Time_Series_BTC.html)
 
-Other projects: 
+Other data science projects: 
 
-* [Visualisation of beneficiaries of EU funds in Poland (web app, due to free hosting takes a bit to run)](https://kmatusz111.shinyapps.io/eu_budget/)
+<!-- * [Stereotypes or political correctness - NLP analysis of nearly 100 years of Polish Sejm sessions](report_sejm.html) -->
+* [Quantifying stereotypes using text embeddings of nearly 100 years of Polish Parliament sessions transcripts](report_sejm.html)
+* [Visualisation of beneficiaries of EU funds in Poland (web app, due to free hosting it takes a bit to run)](https://kmatusz111.shinyapps.io/eu_budget/)
 * [Dimension reduction techniques in network analysis](USL/network_dimension.html)
 * [Demonstration of kmeans++, a robust alternative to k-means algorithm](USL/kmeanspp.html)
 * [Implementation of recommender system using association rules mining](USL/recommender.html)
@@ -32,4 +31,4 @@ Other projects:
 <!-- * [Template for machine learning modelling](template_modelling.html) -->
 <!-- * [Analysis of Sejm Votings-hackathon (in polish)](https://github.com/Kamyki/Hackaton-fuw) -->
 
-<!-- You can find my CV [here](CV.pdf). -->
+You can find my CV [here](CVs/Kamil Matuszelanski resume.pdf).

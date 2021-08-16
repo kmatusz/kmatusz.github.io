@@ -9,9 +9,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Modeling customer churn in e-commerce retail business
 
+**The whole paper can be found under [this link](mgr/mgr.pdf).**
 
 This is a summary of my Master's Thesis paper on the Data Science degree on the Faculty of Economics - University of Warsaw, Poland. The goal of this study was to propose a model for predicting customer loyalty in an e-commerce retail business, as well as infer the factors driving customer loyalty.
-The whole paper can be found under [this link](mgr/mgr.pdf).
 
 The dataset used was obtained from Olist e-commerce retail company operating in Brazil. A wide range of variables was used in the modelling process, including transaction data, customer location, and customer perception about the previous purchase. This dataset was enhanced by adding the data from the national census. A distinctive characteristic of this company is that a very low percentage of customers decides to make a second purchase (3,3%), which made the modelling harder.
 

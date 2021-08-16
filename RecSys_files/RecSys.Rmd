@@ -14,7 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introduction
 
-This is my proposal for a solution of the RecSys 2021 challenge - engagement prediction for Tweets ([link](https://recsys.acm.org/recsys21/challenge/)). I have prepared this document during *Recommender Systems* lecture conducted by Santiago Segui Mesquida, Ph.D., during my Erasmus exchange at Universitat de Barcelona, Spain.
+This is my proposal for a solution of the RecSys 2021 chaellenge - engagement prediction for Tweets ([link](https://recsys.acm.org/recsys21/challenge/)). I have prepared this document during *Recommender Systems* lecture conducted by Santiago Segui Mesquida, Ph.D., during my Erasmus exchange at Universitat de Barcelona, Spain.
 
 I will use DeepFM model with externally trained embeddings of user followers network, and also of twitter text. The rest of the embeddings for other features will be trained internaly in the model.
 
