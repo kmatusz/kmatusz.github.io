@@ -1,5 +1,5 @@
 
-Hi, I am Kamil Matuszelański. I am currently enrolled in Master's Data Science Studies. Here you can find the list of my finished projects:
+Hi, I am Kamil Matuszelański. I have 2.5 years of experience in data science-related jobs and internships, with responsibilities including data analysis, data visualisation, dashboarding and ETL pipelines engineering. For the last two years, I was also pursuing a Master’s degree in Data Science, which I believe gave me the skills required to successfully work in this area. At the moment I am living in Warsaw, Poland, but I am willing to permanently relocate to Amsterdam in mid September. Here you can find the list of my finished university projects:
 
 Graduate theses:
 
